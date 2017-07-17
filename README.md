@@ -6,8 +6,8 @@ most of code of this are from https://github.com/GNOME/epiphany/tree/master/embe
 
 ### usage:
 
-  make
-  make install
+    make
+    make install
 
 then
 copy easylist.txt to ~/.config/wyebadblock
