@@ -984,6 +984,18 @@ static void initex(WebKitWebExtension *ex, WebKitWebPage *wp)
 G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 		WebKitWebExtension *ex, const GVariant *v)
 {
-	g_signal_connect(ex, "page-created", G_CALLBACK(initex), NULL);
+	bool enable = true;
+	const gchar *str = g_variant_get_string((GVariant *)v, NULL);
+	if (str)
+	{
+		gchar **args = g_strsplit(str, ";", -1);
+		for (gchar **arg = args; *arg; arg++)
+			if (g_str_has_prefix(*arg, "adblock:"))
+				enable = strcmp(*arg + 8, "true") == 0;
+		g_strfreev(args);
+	}
+
+	if (enable)
+		g_signal_connect(ex, "page-created", G_CALLBACK(initex), NULL);
 }
 
