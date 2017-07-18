@@ -10,7 +10,7 @@ most of code of this are from https://github.com/GNOME/epiphany/tree/master/embe
     make install
 
 then
-copy easylist.txt to ~/.config/wyebadblock
+copy **easylist.txt** to ~/.config/wyebadblock
 
 this only checks 'easylist.txt'
 
