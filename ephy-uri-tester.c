@@ -921,6 +921,7 @@ ephy_uri_tester_load (EphyUriTester *tester)
 
 //added
 #include <webkit2/webkit-web-extension.h>
+#include <stdlib.h>
 static EphyUriTester *uri_tester;
 
 static gboolean reqcb (WebKitWebPage     *web_page,
@@ -976,7 +977,8 @@ static void initex(WebKitWebExtension *ex, WebKitWebPage *wp)
 			filter_file = g_file_new_for_path(filter_path);
 			uri_tester = ephy_uri_tester_new("/foo/bar");
 		}
-		g_signal_connect(wp, "send-request", G_CALLBACK(reqcb), NULL);
+		if (wp)
+			g_signal_connect(wp, "send-request", G_CALLBACK(reqcb), NULL);
 	}
 
 	g_free(filter_path);
@@ -999,3 +1001,15 @@ G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 		g_signal_connect(ex, "page-created", G_CALLBACK(initex), NULL);
 }
 
+
+int main(int argc, char **argv)
+{
+	initex(NULL, NULL);
+    ephy_uri_tester_load(uri_tester);
+
+	g_print(uri_tester->blockcss->str);
+	g_print("\n\n\n\n\n\n\n\n");
+	g_print(uri_tester->blockcssprivate->str);
+
+	exit(0);
+}

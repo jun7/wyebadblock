@@ -12,6 +12,12 @@ adblock.so: ephy-uri-tester.c ephy-uri-tester.h
 		-DEXTENSION_DIR=\"$(EXTENSION_DIR)\" \
 		$(DDEBUG) $(DAPPNAME)
 
+cssoutput: ephy-uri-tester.c ephy-uri-tester.h
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< \
+		`pkg-config --cflags --libs gtk+-3.0 glib-2.0 webkit2gtk-4.0` \
+		-DEXTENSION_DIR=\"$(EXTENSION_DIR)\" \
+		$(DDEBUG) $(DAPPNAME)
+
 clean:
 	rm -f adblock.so
 
