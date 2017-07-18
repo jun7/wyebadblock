@@ -1,16 +1,15 @@
 # Maintainer: jun7 <jun7@hush.com>
-
-pkgname=wyebadblock
+pkgname=wyebadblock-git
 pkgver=1.1
 pkgrel=1
-branch=master
 pkgdesc="A adblock extension for wyeb, also webkit2gtk browsers may be."
 arch=('x86_64')
-license=('GPL')
 url="https://github.com/jun7/wyebadblock"
+license=('GPL3')
 depends=('webkit2gtk')
 makedepends=('git')
-source=("git://github.com/jun7/wyebadblock.git#branch=$branch")
+_branch=master
+source=("git://github.com/jun7/wyebadblock.git#branch=$_branch")
 md5sums=('SKIP')
 
 pkgver(){
@@ -20,7 +19,7 @@ pkgver(){
 
 prepare() {
 	cd "$srcdir/wyebadblock"
-	git pull --rebase origin $branch
+	git pull --rebase origin $_branch
 }
 
 build() {
@@ -30,5 +29,5 @@ build() {
 
 package() {
 	cd "$srcdir/wyebadblock"
-	install -Dm755 adblock.so   "$pkgdir/usr/share/wyebrowser/adblock.so"
+	install -Dm755 adblock.so   "$pkgdir/usr/lib/wyebrowser/adblock.so"
 }
