@@ -2,7 +2,7 @@
 pkgname=wyebadblock-git
 pkgver=1.1
 pkgrel=1
-pkgdesc="A adblock extension for wyeb, also webkit2gtk browsers may be."
+pkgdesc="An adblock extension for webkit2gtk browsers."
 arch=('x86_64')
 url="https://github.com/jun7/wyebadblock"
 license=('GPL3')
