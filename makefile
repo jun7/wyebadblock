@@ -24,3 +24,6 @@ clean:
 install: all
 	install -Dm755 adblock.so $(EXTENSION_DIR)/adblock.so
 
+uninstall:
+	rm -f  $(EXTENSION_DIR)/adblock.so
+	-rmdir $(EXTENSION_DIR)
