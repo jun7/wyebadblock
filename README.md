@@ -17,6 +17,8 @@ this only checks 'easylist.txt'
 
 
 ## for webkit2gtk's browsers
+On Arch Linux
+
 ### luakit
 
 	sudo ln -s /lib/wyebrowser/adblock.so /lib/luakit
