@@ -16,7 +16,7 @@ this only checks 'easylist.txt'
 
 
 
-## for webkit2gtk's browsers
+## webkit2gtk browsers
 On Arch Linux
 
 ### luakit
