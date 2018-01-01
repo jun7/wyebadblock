@@ -14,7 +14,7 @@ copy **easylist.txt** to ~/.config/wyebadblock
 
 this only checks 'easylist.txt'
 
-
+---
 
 ## webkit2gtk browsers
 On Arch Linux
