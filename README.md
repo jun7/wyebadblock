@@ -36,8 +36,12 @@ On Arch Linux
 ### vimb
 
 	sudo ln -s /lib/wyebrowser/adblock.so /lib/vimb
+	
+There is a PKGBUILD file. see PKGBULDs dir.
+For luakit, just change the strings in the file 'vimb' -> 'luakit'.
 
 ### lariza
 
 	mkdir -p ~/.config/lariza/web_extensions
 	ln -s /lib/wyebrowser/adblock.so ~/.config/lariza/web_extensions
+
