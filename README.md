@@ -12,10 +12,10 @@ most of code of this are from https://github.com/GNOME/epiphany/tree/master/embe
 then
 copy **easylist.txt** to ~/.config/wyebadblock
 
-this only checks 'easylist.txt'
+wyebadblock only checks 'easylist.txt'
 
 
----
+### Disabling
 
 Setting chars(whatever) to the env value $DISABLE_ADBLOCK disables adblock.
 
@@ -26,7 +26,7 @@ webkit_web_context_set_web_extensions_initialization_user_data;
 
 ---
 
-## webkit2gtk browsers
+## For webkit2gtk browsers
 On Arch Linux
 
 ### luakit
