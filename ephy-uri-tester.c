@@ -945,8 +945,14 @@ static gboolean reqcb (WebKitWebPage     *web_page,
     char *result;
 	if (initt)
 	{
-		g_thread_join(initt);
-		initt = NULL;
+		SoupMessageHeaders *head = webkit_uri_request_get_http_headers(request);
+		if (head)
+		{
+			g_thread_join(initt);
+			initt = NULL;
+		}
+		else //no head is local data. so haven't to block
+			return false;
 	}
     result = ephy_uri_tester_rewrite_uri (uri_tester,
                                           modified_uri ? modified_uri : request_uri,
