@@ -1017,8 +1017,8 @@ int main(int argc, char **argv)
     ephy_uri_tester_load(uri_tester);
 
 	g_print(uri_tester->blockcss->str);
-	g_print("\n\n\n\n\n\n\n\n");
-	g_print(uri_tester->blockcssprivate->str);
+	g_print("\n\n\n\n{display: none !important}\n\n\n\n");
+//	g_print(uri_tester->blockcssprivate->str);
 
 	exit(0);
 }

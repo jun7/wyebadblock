@@ -6,14 +6,17 @@ most of code of this are from https://github.com/GNOME/epiphany/tree/master/embe
 
 ### usage:
 
-    make
-    make install
+	make
+	make install
 
 then
 copy **easylist.txt** to ~/.config/wyebadblock/
 
 wyebadblock only checks 'easylist.txt'
 
+
+Check it on `http://simple-adblock.com/faq/testing-your-adblocker/`.
+Testing element hiding is not supported.
 
 ### Disabling
 
@@ -36,7 +39,7 @@ On Arch Linux
 ### vimb
 
 	sudo ln -s /lib/wyebrowser/adblock.so /lib/vimb
-	
+
 There is a PKGBUILD file. see PKGBULDs dir.
 For luakit, just change the strings in the file 'vimb' -> 'luakit'.
 
@@ -45,3 +48,13 @@ For luakit, just change the strings in the file 'vimb' -> 'luakit'.
 	mkdir -p ~/.config/lariza/web_extensions
 	ln -s /lib/wyebrowser/adblock.so ~/.config/lariza/web_extensions
 
+
+
+## Element Hiding
+Per domain CSS hider rule in not supported and this may crash webkit2gtk though.
+
+	make cssoutput
+	./cssoutput > user.css
+
+And add the user.css to your browser as user css.
+On wyeb, just copy the user.css to the conf dir.
