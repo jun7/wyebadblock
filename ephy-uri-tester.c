@@ -924,6 +924,7 @@ ephy_uri_tester_load (EphyUriTester *tester)
 #include <stdlib.h>
 static EphyUriTester *uri_tester;
 static GThread *initt = NULL;
+static bool tend = false;
 
 static gboolean reqcb (WebKitWebPage     *web_page,
                        WebKitURIRequest  *request,
@@ -946,7 +947,7 @@ static gboolean reqcb (WebKitWebPage     *web_page,
 	if (initt)
 	{
 		SoupMessageHeaders *head = webkit_uri_request_get_http_headers(request);
-		if (head)
+		if (head || tend)
 		{
 			g_thread_join(initt);
 			initt = NULL;
@@ -979,6 +980,7 @@ static gboolean reqcb (WebKitWebPage     *web_page,
 static gpointer inittcb(gpointer data)
 {
 	ephy_uri_tester_load(uri_tester);
+	tend = true;
 	return NULL;
 }
 
