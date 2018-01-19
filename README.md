@@ -15,8 +15,8 @@ copy **easylist.txt** to ~/.config/wyebadblock/
 wyebadblock only checks 'easylist.txt'
 
 
-Check it on `http://simple-adblock.com/faq/testing-your-adblocker/`.
-Testing element hiding is not supported.
+You can check if it works on http://simple-adblock.com/faq/testing-your-adblocker/
+Testing element hiding is not supported though.
 
 ### Disabling
 
@@ -28,6 +28,7 @@ webkit_web_context_set_web_extensions_initialization_user_data;
 
 
 ---
+
 
 ## For webkit2gtk browsers
 On Arch Linux
@@ -49,9 +50,11 @@ For luakit, just change the strings in the file 'vimb' -> 'luakit'.
 	ln -s /lib/wyebrowser/adblock.so ~/.config/lariza/web_extensions
 
 
+---
+
 
 ## Element Hiding
-Per domain CSS hider rule in not supported and this may crash webkit2gtk though.
+Per domain CSS hider rule is not supported and this may crash webkit2gtk.
 
 	make cssoutput
 	./cssoutput > user.css
