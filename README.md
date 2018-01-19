@@ -33,16 +33,15 @@ webkit_web_context_set_web_extensions_initialization_user_data;
 ## For webkit2gtk browsers
 On Arch Linux
 
-### luakit
-
-	sudo ln -s /lib/wyebrowser/adblock.so /lib/luakit
+### surf
+	sudo mkdir usr/local/lib/surf
+	sudo ln -s /lib/wyebrowser/adblock.so /usr/local/lib/surf
 
 ### vimb
 
 	sudo ln -s /lib/wyebrowser/adblock.so /lib/vimb
 
 There is a PKGBUILD file. see PKGBULDs dir.
-For luakit, just change the strings in the file 'vimb' -> 'luakit'.
 
 ### lariza
 
