@@ -923,6 +923,7 @@ ephy_uri_tester_load (EphyUriTester *tester)
 #include <webkit2/webkit-web-extension.h>
 #include <stdlib.h>
 static EphyUriTester *uri_tester;
+static GThread *initt = NULL;
 
 static gboolean reqcb (WebKitWebPage     *web_page,
                        WebKitURIRequest  *request,
@@ -942,7 +943,11 @@ static gboolean reqcb (WebKitWebPage     *web_page,
 
   if ((flags & EPHY_URI_TEST_ADBLOCK) || (flags & EPHY_URI_TEST_HTTPS_EVERYWHERE)) {
     char *result;
-    ephy_uri_tester_load (uri_tester);
+	if (initt)
+	{
+		g_thread_join(initt);
+		initt = NULL;
+	}
     result = ephy_uri_tester_rewrite_uri (uri_tester,
                                           modified_uri ? modified_uri : request_uri,
                                           page_uri, flags);
@@ -965,6 +970,12 @@ static gboolean reqcb (WebKitWebPage     *web_page,
   return FALSE;
 }
 
+static gpointer inittcb(gpointer data)
+{
+	ephy_uri_tester_load(uri_tester);
+	return NULL;
+}
+
 static void initex(WebKitWebExtension *ex, WebKitWebPage *wp)
 {
 	gchar *filter_path = g_build_filename(
@@ -976,6 +987,8 @@ static void initex(WebKitWebExtension *ex, WebKitWebPage *wp)
 		{
 			filter_file = g_file_new_for_path(filter_path);
 			uri_tester = ephy_uri_tester_new("/foo/bar");
+
+			initt = g_thread_new("init", inittcb, NULL);
 		}
 		if (wp)
 			g_signal_connect(wp, "send-request", G_CALLBACK(reqcb), NULL);
