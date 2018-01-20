@@ -395,7 +395,7 @@ ephy_uri_tester_add_url_pattern (EphyUriTester *tester,
 static inline void
 ephy_uri_tester_frame_add (EphyUriTester *tester, char *line)
 {
-  const char *separator = " , ";
+  const char *separator = ",\n";
 
   (void)*line++;
   (void)*line++;
