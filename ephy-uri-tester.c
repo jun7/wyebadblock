@@ -1036,6 +1036,7 @@ int main(int argc, char **argv)
 {
 	initex(NULL, NULL);
     ephy_uri_tester_load(uri_tester);
+	g_thread_join(initt);
 
 	g_print(uri_tester->blockcss->str);
 	g_print("\n\n\n\n{display: none !important}\n\n\n\n");
