@@ -1035,7 +1035,6 @@ G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 int main(int argc, char **argv)
 {
 	initex(NULL, NULL);
-    ephy_uri_tester_load(uri_tester);
 	g_thread_join(initt);
 
 	g_print(uri_tester->blockcss->str);
