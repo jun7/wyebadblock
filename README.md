@@ -37,6 +37,8 @@ On Arch Linux
 	sudo mkdir usr/local/lib/surf
 	sudo ln -s /lib/wyebrowser/adblock.so /usr/local/lib/surf
 
+See vimb below to manage the link by pacman
+
 ### vimb
 
 	sudo ln -s /lib/wyebrowser/adblock.so /lib/vimb
@@ -49,7 +51,10 @@ There is a PKGBUILD file. see PKGBULDs dir.
 	ln -s /lib/wyebrowser/adblock.so ~/.config/lariza/web_extensions
 
 
-### Other webkit2gtk browsers
+### Others
+
+webkit2gtk loads extensions in a dir designated by each apps.
+So we have to know which dir is the dir.
 
 search 'webkit_web_context_set_web_extensions_directory' in source code
 and make link from the dir to the wyebadblock as above.
