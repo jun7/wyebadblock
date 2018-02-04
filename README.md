@@ -49,6 +49,12 @@ There is a PKGBUILD file. see PKGBULDs dir.
 	ln -s /lib/wyebrowser/adblock.so ~/.config/lariza/web_extensions
 
 
+### Other webkit2gtk browsers
+
+search 'webkit_web_context_set_web_extensions_directory' in source code
+and make link from the dir to the wyebadblock as above.
+
+
 ---
 
 
@@ -60,3 +66,8 @@ Per domain CSS hider rule is not supported and this may crash webkit2gtk.
 
 And add the user.css to your browser as user css.
 On wyeb, just copy the user.css to the conf dir.
+
+The user.css uses 'display:none'. As the http://simple-adblock.com/faq/testing-your-adblocker/
+it is easily detacted by sites, so it may causes the messages do disable adblock.
+
+
