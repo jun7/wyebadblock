@@ -5,6 +5,10 @@ most of code of this are from https://github.com/GNOME/epiphany/tree/master/embe
 
 
 ### usage:
+depends:
+
+- arch linux: 'webkit2gtk'
+- debian 9.3: libwebkit2gtk-4.0-dev
 
 	make
 	make install
