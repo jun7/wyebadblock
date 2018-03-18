@@ -43,7 +43,7 @@ See vimb below to manage the link by pacman
 
 	sudo ln -s /lib/wyebrowser/adblock.so /lib/vimb
 
-There is a PKGBUILD file. see PKGBULDs dir.
+There is a PKGBUILD file. see the 'PKGBULDs' dir.
 
 ### lariza
 
