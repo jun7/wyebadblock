@@ -35,20 +35,20 @@ On Arch Linux
 
 ### surf
 	sudo mkdir usr/local/lib/surf
-	sudo ln -s /lib/wyebrowser/adblock.so /usr/local/lib/surf
+	sudo ln -s /usr/lib/wyebrowser/adblock.so /usr/local/lib/surf
 
 See vimb below to manage the link by pacman
 
 ### vimb
 
-	sudo ln -s /lib/wyebrowser/adblock.so /lib/vimb
+	sudo ln -s /usr/lib/wyebrowser/adblock.so /usr/lib/vimb
 
 There is a PKGBUILD file. see the 'PKGBULDs' dir.
 
 ### lariza
 
 	mkdir -p ~/.config/lariza/web_extensions
-	ln -s /lib/wyebrowser/adblock.so ~/.config/lariza/web_extensions
+	ln -s /usr/lib/wyebrowser/adblock.so ~/.config/lariza/web_extensions
 
 
 ### Others
