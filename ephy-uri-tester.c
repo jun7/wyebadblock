@@ -1,5 +1,5 @@
 /*
- *  Copyright 2017 jun7
+ *  Copyright 2017-2018 jun7
  *  Copyright © 2011 Igalia S.L.
  *
  *  This file is part of Epiphany.
@@ -1009,7 +1009,7 @@ G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 {
 	bool enable = true;
 	bool hasarg = false;
-	if (v)
+	if (v && g_variant_is_of_type((GVariant *)v, G_VARIANT_TYPE_STRING))
 	{
 		const gchar *str = g_variant_get_string((GVariant *)v, NULL);
 		if (str)
