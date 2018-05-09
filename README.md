@@ -71,8 +71,3 @@ Per domain CSS hider rule is not supported and this may crash webkit2gtk.
 
 And add the user.css to your browser as user css.
 On wyeb, just copy the user.css to the conf dir.
-
-The user.css uses 'display:none'. As the http://simple-adblock.com/faq/testing-your-adblocker/
-it is easily detected by sites, so it may causes the messages do disable adblock.
-
-
