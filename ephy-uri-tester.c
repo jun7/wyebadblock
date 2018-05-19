@@ -868,6 +868,7 @@ ephy_uri_tester_new (const char *adblock_data_dir)
   return EPHY_URI_TESTER (g_object_new (EPHY_TYPE_URI_TESTER, "adblock-data-dir", adblock_data_dir, NULL));
 }
 
+/*
 static void
 ephy_uri_tester_adblock_filters_changed_cb (GSettings     *settings,
                                             char          *key,
@@ -886,12 +887,13 @@ ephy_uri_tester_adblock_filters_changed_cb (GSettings     *settings,
   tester->adblock_loaded = FALSE;
   ephy_uri_tester_load (tester);
 }
+*/
 
 void
 ephy_uri_tester_load (EphyUriTester *tester)
 {
   GTask *task;
-  char **trash;
+//  char **trash;
 
   g_return_if_fail (EPHY_IS_URI_TESTER (tester));
 
@@ -920,90 +922,58 @@ ephy_uri_tester_load (EphyUriTester *tester)
 
 
 //added
-#include <webkit2/webkit-web-extension.h>
 #include <stdlib.h>
-static EphyUriTester *uri_tester;
-static GThread *initt = NULL;
-static bool tend = false;
+#include <stdbool.h>
 
-static gboolean reqcb (WebKitWebPage     *web_page,
-                       WebKitURIRequest  *request,
-                       WebKitURIResponse *redirected_response,
-                       gpointer  *p)
+#include "wyebrun.h"
+
+#define EXE "wyebab"
+
+#if DEBUG
+# define D(f, ...) g_print(#f"\n", __VA_ARGS__);
+# define DD(a) g_print(#a"\n");
+#else
+# define D(f, ...) ;
+# define DD(a) ;
+#endif
+
+#if ISEXT
+
+#include <webkit2/webkit-web-extension.h>
+static bool first = true;
+static gboolean reqcb(WebKitWebPage *page, WebKitURIRequest *request,
+		WebKitURIResponse *r, gpointer p)
 {
-  const char *request_uri;
-  const char *redirected_response_uri;
-  const char *page_uri;
-  char *modified_uri = NULL;
-  EphyUriTestFlags flags = EPHY_URI_TEST_ADBLOCK;
-  request_uri = webkit_uri_request_get_uri (request);
-  page_uri = webkit_web_page_get_uri (web_page);
+	const char *request_uri = webkit_uri_request_get_uri(request);
+	const char *page_uri    = webkit_web_page_get_uri(page);
 
-  redirected_response_uri = redirected_response ?
-	  webkit_uri_response_get_uri (redirected_response) : NULL;
-
-  if ((flags & EPHY_URI_TEST_ADBLOCK) || (flags & EPHY_URI_TEST_HTTPS_EVERYWHERE)) {
-    char *result;
-	if (initt)
+	if (first)
 	{
-		SoupMessageHeaders *head = webkit_uri_request_get_http_headers(request);
-		if (head || tend)
-		{
-			g_thread_join(initt);
-			initt = NULL;
-		}
+		if (webkit_uri_request_get_http_headers(request))
+			first = false;
 		else //no head is local data. so haven't to block
 			return false;
 	}
-    result = ephy_uri_tester_rewrite_uri (uri_tester,
-                                          modified_uri ? modified_uri : request_uri,
-                                          page_uri, flags);
-    g_free (modified_uri);
 
-    if (!result) {
-      return TRUE;
-    }
+	char *req = g_strconcat(request_uri, " ", page_uri, NULL);
+	char *res = wyebreq(EXE, req);
+	g_free(req);
 
-    modified_uri = result;
-  } else if (!modified_uri) {
-    return FALSE;
-  }
+	if (!res) return true;
 
-  if (g_strcmp0 (request_uri, modified_uri) != 0) {
-    webkit_uri_request_set_uri (request, modified_uri);
-  }
-  g_free (modified_uri);
+	if (g_strcmp0(request_uri, res))
+		webkit_uri_request_set_uri(request, res);
 
-  return FALSE;
+	return FALSE;
 }
 
-static gpointer inittcb(gpointer data)
+
+static void pageinit(WebKitWebExtension *ex, WebKitWebPage *wp)
 {
-	ephy_uri_tester_load(uri_tester);
-	tend = true;
-	return NULL;
+	DD(pageinit)
+	g_signal_connect(wp, "send-request", G_CALLBACK(reqcb), NULL);
 }
 
-static void initex(WebKitWebExtension *ex, WebKitWebPage *wp)
-{
-	gchar *filter_path = g_build_filename(
-			g_get_user_config_dir(), APPNAME, "easylist.txt", NULL);
-
-	if (g_file_test(filter_path, G_FILE_TEST_EXISTS))
-	{
-		if (!filter_file)
-		{
-			filter_file = g_file_new_for_path(filter_path);
-			uri_tester = ephy_uri_tester_new("/foo/bar");
-
-			initt = g_thread_new("init", inittcb, NULL);
-		}
-		if (wp)
-			g_signal_connect(wp, "send-request", G_CALLBACK(reqcb), NULL);
-	}
-
-	g_free(filter_path);
-}
 G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 		WebKitWebExtension *ex, const GVariant *v)
 {
@@ -1028,18 +998,101 @@ G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 		enable = false;
 
 	if (enable)
-		g_signal_connect(ex, "page-created", G_CALLBACK(initex), NULL);
+	{
+		wyebloop(EXE, 30, 24);
+		g_signal_connect(ex, "page-created", G_CALLBACK(pageinit), NULL);
+	}
+}
+
+#endif
+
+
+static EphyUriTester *tester = NULL;
+static GThread *initt = NULL;
+
+static gpointer inittcb(gpointer data)
+{
+	ephy_uri_tester_load(tester);
+	return NULL;
+}
+
+static void monitorcb(
+		GFileMonitor *m, GFile *f, GFile *o, GFileMonitorEvent e, gpointer p)
+{
+	if (e == G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT ||
+			e == G_FILE_MONITOR_EVENT_DELETED)
+		exit(0);
+}
+static void init()
+{
+	DD(wyebad init)
+	gchar *path = g_build_filename(
+			g_get_user_config_dir(), APPNAME, "easylist.txt", NULL);
+
+	GFile *gf = g_file_new_for_path(path);
+	GFileMonitor *gm = g_file_monitor_file(gf,
+			G_FILE_MONITOR_NONE, NULL, NULL);
+	g_signal_connect(gm, "changed", G_CALLBACK(monitorcb), NULL);
+	g_object_unref(gf);
+
+	if (g_file_test(path, G_FILE_TEST_EXISTS))
+	{
+		filter_file = g_file_new_for_path(path);
+		tester = ephy_uri_tester_new("/foo/bar");
+
+		initt = g_thread_new("init", inittcb, NULL);
+	}
+
+	g_free(path);
+}
+
+static char *datafunc(char *req)
+{
+	if (initt)
+	{
+		g_thread_join(initt);
+		initt = NULL;
+	}
+
+	//req uri + ' ' + page uri
+	gchar **args = g_strsplit(req, " ", 2);
+
+	char *ret = !tester ? g_strdup(args[0]) : ephy_uri_tester_rewrite_uri(tester,
+			args[0],  args[1] ?: args[0], EPHY_URI_TEST_ADBLOCK);
+
+	g_strfreev(args);
+
+	return ret;
 }
 
 
 int main(int argc, char **argv)
 {
-	initex(NULL, NULL);
-	g_thread_join(initt);
+	DD(This bin is compiled with DEBUG=1)
 
-	g_print(uri_tester->blockcss->str);
-	g_print("\n\n\n\n{display: none !important}\n\n\n\n");
-//	g_print(uri_tester->blockcssprivate->str);
+	if (argc == 1)
+	{
+		wyebclient(argv[0]);
+	}
+	else if (g_str_has_prefix(argv[1], WYEBPREFIX))
+	{
+		init();
+		wyebsvr(argc, argv, datafunc);
+	}
+	else if (!strcmp(argv[1], "-css"))
+	{
+		init();
+		g_thread_join(initt);
+
+		g_print(tester->blockcss->str);
+		g_print("\n\n\n\n{display: none !important}\n\n\n\n");
+		//g_print(tester->blockcssprivate->str);
+	}
+	else
+	{
+		wyebuntil(argv[0], 30);
+		g_print("%s", wyebreq(argv[0], argv[1]));
+	}
 
 	exit(0);
 }

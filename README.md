@@ -3,6 +3,9 @@ An adblock extension for [wyeb](https://github.com/jun7/wyeb), also webkit2gtk b
 
 most of code of this are from https://github.com/GNOME/epiphany/tree/master/embed/web-extension
 
+wyebad is shared by clients, So even nowadays, browsers spawn procs for each windows,
+wyebad keeps single server proc that makes less memory and less cpu times.
+Don't worry, wyeb wills quit automatically when there is no client and 30 secs past.
 
 ### usage:
 
@@ -14,9 +17,8 @@ copy **easylist.txt** to ~/.config/wyebadblock/
 
 wyebadblock only checks 'easylist.txt'
 
-
+Testing element hiding is not supported though,
 You can check if it works on http://simple-adblock.com/faq/testing-your-adblocker/
-Testing element hiding is not supported though.
 
 ### Disabling
 
@@ -64,10 +66,22 @@ and make link from the dir to the wyebadblock as above.
 
 
 ## Element Hiding
-Per domain CSS hider rule is not supported and this may crash webkit2gtk.
+Per domain CSS hider rule is not supported
 
-	make cssoutput
-	./cssoutput > user.css
+	wyebab -css > user.css
 
 And add the user.css to your browser as user css.
-On wyeb, just copy the user.css to the conf dir.
+For wyeb, just copy the user.css to the conf dir.
+
+
+## Shell
+
+	wyebab
+
+Reads stdin outputs to stdout.
+blank + enter quits.
+
+	wyebab requst_uri + ' ' + page_uri
+
+Outputs result
+Keeps server 30 sec
