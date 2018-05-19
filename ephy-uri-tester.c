@@ -1029,11 +1029,6 @@ static void init()
 	gchar *path = g_build_filename(
 			g_get_user_config_dir(), APPNAME, "easylist.txt", NULL);
 
-	char *dir = g_path_get_dirname(path);
-	if (!g_file_test(dir, G_FILE_TEST_EXISTS))
-		g_mkdir_with_parents(dir, 0700);
-	g_free(dir);
-
 	GFile *gf = g_file_new_for_path(path);
 	GFileMonitor *gm = g_file_monitor_file(gf,
 			G_FILE_MONITOR_NONE, NULL, NULL);
@@ -1046,6 +1041,11 @@ static void init()
 		tester = ephy_uri_tester_new("/foo/bar");
 
 		initt = g_thread_new("init", inittcb, NULL);
+	} else {
+		char *dir = g_path_get_dirname(path);
+		if (!g_file_test(dir, G_FILE_TEST_EXISTS))
+			g_mkdir_with_parents(dir, 0700);
+		g_free(dir);
 	}
 
 	g_free(path);
