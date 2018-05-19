@@ -196,7 +196,7 @@ bool wyebsvr(int argc, char **argv, wyebdataf func)
 static void getdata(char *caller, char *req)
 {
 	char *data = dataf(req);
-	if (!ipcsend(svrexe, caller, CCret, "", data))
+	if (*caller && !ipcsend(svrexe, caller, CCret, "", data))
 		fatal(2);
 
 	g_free(data);
