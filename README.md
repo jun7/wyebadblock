@@ -9,7 +9,7 @@ Don't worry, wyeb wills quit automatically when there is no client and 30 secs p
 
 For exsample, while epiphay's webproc uses 240M RAM for
 [a page](http://simple-adblock.com/faq/testing-your-adblocker/), wyeb uses 160M for the same page.
-Of cause the adblock uses 80M but not gain.
+Of course the adblock uses 80M but not gain.
 
 ### usage:
 
