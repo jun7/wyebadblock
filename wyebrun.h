@@ -27,6 +27,7 @@ along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 //client
 //wyebrun spawns the exe if wyebsend failes
 char *wyebreq(   char *exe, char *req);
+void  wyebsend(  char *exe, char *req);
 void  wyebuntil( char *exe, int   sec); //keep alive. default is 10s
 //loop the wyebuntil. to stop, use g_source_remove
 guint wyebloop(  char *exe, int   sec, int loopsec);
@@ -43,5 +44,6 @@ bool wyebsvr(int argc, char **argv, wyebdataf func);
 void wyebwatch(char *exe, char *caller, wyebdataf func);
 //the caller is used to send the res meaning we are ready.
 //3 sec left or client will die
+
 
 #endif //_WYEBRUN_H

@@ -360,6 +360,10 @@ char *wyebreq(char *exe, char *req)
 {
 	return request(exe, CSdata, pid(), req);
 }
+void wyebsend(char *exe, char *req)
+{
+	request(exe, CSdata, NULL, req);
+}
 void wyebuntil(char *exe, int sec)
 {
 	if (!lastsec)
