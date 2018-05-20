@@ -17,9 +17,9 @@ You should have received a copy of the GNU General Public License
 along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef _WYEBRUN_H
 #define _WYEBRUN_H
+
 
 #define WYEBPREFIX "-wyeb"
 #define WYEBDUNTIL 3
@@ -28,13 +28,12 @@ along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 //wyebrun spawns the exe if wyebsend failes
 char *wyebreq(   char *exe, char *req);
 void  wyebsend(  char *exe, char *req);
-void  wyebuntil( char *exe, int   sec); //keep alive. default is 10s
+void  wyebuntil( char *exe, int   sec); //keep alive. default is 3s
 //loop the wyebuntil. to stop, use g_source_remove
 guint wyebloop(  char *exe, int   sec, int loopsec);
 //send stdin to svr and ret data to stdout
 //blank and enter exit it
 void  wyebclient(char *exe);
-
 
 //server
 typedef char *(*wyebdataf)(char *req);
