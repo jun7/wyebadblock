@@ -941,30 +941,30 @@ ephy_uri_tester_load (EphyUriTester *tester)
 
 #include <webkit2/webkit-web-extension.h>
 static bool first = true;
-static gboolean reqcb(WebKitWebPage *page, WebKitURIRequest *request,
+static gboolean reqcb(WebKitWebPage *page, WebKitURIRequest *req,
 		WebKitURIResponse *r, gpointer p)
 {
-	const char *request_uri = webkit_uri_request_get_uri(request);
-	const char *page_uri    = webkit_web_page_get_uri(page);
+	const char *requri  = webkit_uri_request_get_uri(req);
+	const char *pageuri = webkit_web_page_get_uri(page);
 
 	if (first)
 	{
-		if (webkit_uri_request_get_http_headers(request))
+		if (webkit_uri_request_get_http_headers(req))
 			first = false;
 		else //no head is local data. so haven't to block
 			return false;
 	}
 
-	char *req = g_strconcat(request_uri, " ", page_uri, NULL);
-	char *res = wyebreq(EXE, req);
-	g_free(req);
+	char *uris = g_strconcat(requri, " ", pageuri, NULL);
+	char *ruri = wyebreq(EXE, uris);
+	g_free(uris);
 
-	if (!res) return true;
+	if (!ruri) return true;
 
-	if (g_strcmp0(request_uri, res))
-		webkit_uri_request_set_uri(request, res);
+	if (g_strcmp0(requri, ruri))
+		webkit_uri_request_set_uri(req, ruri);
 
-	return FALSE;
+	return false;
 }
 
 
@@ -981,11 +981,11 @@ G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 	bool hasarg = false;
 	if (v && g_variant_is_of_type((GVariant *)v, G_VARIANT_TYPE_STRING))
 	{
-		const gchar *str = g_variant_get_string((GVariant *)v, NULL);
+		const char *str = g_variant_get_string((GVariant *)v, NULL);
 		if (str)
 		{
-			gchar **args = g_strsplit(str, ";", -1);
-			for (gchar **arg = args; *arg; arg++)
+			char **args = g_strsplit(str, ";", -1);
+			for (char **arg = args; *arg; arg++)
 				if (g_str_has_prefix(*arg, "adblock:"))
 				{
 					enable = strcmp(*arg + 8, "true") == 0;
@@ -1026,7 +1026,7 @@ static void monitorcb(
 static void init()
 {
 	DD(wyebad init)
-	gchar *path = g_build_filename(
+	char *path = g_build_filename(
 			g_get_user_config_dir(), APPNAME, "easylist.txt", NULL);
 
 	GFile *gf = g_file_new_for_path(path);
@@ -1060,7 +1060,7 @@ static char *datafunc(char *req)
 	}
 
 	//req uri + ' ' + page uri
-	gchar **args = g_strsplit(req, " ", 2);
+	char **args = g_strsplit(req, " ", 2);
 
 	char *ret = !tester ? g_strdup(args[0]) : ephy_uri_tester_rewrite_uri(tester,
 			args[0],  args[1] ?: args[0], EPHY_URI_TEST_ADBLOCK);
