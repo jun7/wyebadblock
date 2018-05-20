@@ -47,6 +47,10 @@ See vimb below to manage the link by pacman
 
 There is a PKGBUILD file. see the 'PKGBULDs' dir.
 
+### luakit
+
+	sudo ln -s /lib/wyebrowser/adblock.so /lib/luakit
+
 ### lariza
 
 	mkdir -p ~/.config/lariza/web_extensions
