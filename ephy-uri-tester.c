@@ -675,8 +675,8 @@ tester->adblock_filters_to_load = 1;
                          (GAsyncReadyCallback)file_read_cb,
                          tester);
     }
-/*
     g_object_unref (filter_file);
+/*
   }
   g_strfreev (filters);
 */
