@@ -930,8 +930,8 @@ ephy_uri_tester_load (EphyUriTester *tester)
 #define EXE "wyebab"
 
 #if DEBUG
-# define D(f, ...) g_print(#f"\n", __VA_ARGS__);
-# define DD(a) g_print(#a"\n");
+# define D(f, ...) g_print("#"#f"\n", __VA_ARGS__);
+# define DD(a) g_print("#"#a"\n");
 #else
 # define D(f, ...) ;
 # define DD(a) ;

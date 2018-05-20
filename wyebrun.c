@@ -43,8 +43,8 @@ along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 
 #if DEBUG
 static gint64 start;
-# define D(f, ...) g_print(#f"\n", __VA_ARGS__);
-# define DD(a) g_print(#a"\n");
+# define D(f, ...) g_print("#"#f"\n", __VA_ARGS__);
+# define DD(a) g_print("#"#a"\n");
 #else
 # define D(...) ;
 # define DD(a) ;
