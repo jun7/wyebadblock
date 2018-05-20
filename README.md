@@ -77,6 +77,7 @@ Per domain CSS hider rule is not supported
 And add the user.css to your browser as user css.
 For wyeb, just copy the user.css to the conf dir.
 
+Make sure the huge css takes mamory a lot.
 
 ## Shell
 
