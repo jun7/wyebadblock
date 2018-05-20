@@ -1,16 +1,12 @@
-#CFLAGS += -Wall -Wno-deprecated-declarations
-CFLAGS += -Wno-deprecated-declarations
-#LDFLAGS=
 EXTENSION_DIR=$(DESTDIR)/usr/lib/wyebrowser
 DAPPNAME=-DAPPNAME='"wyebadblock"'
-
-ifdef DEBUG
-	DDEBUG=-DDEBUG=${DEBUG}
-
-ifneq ($(DEBUG), 0)
+ifeq ($(DEBUG), 1)
 	CFLAGS += -Wall
+else
+	DEBUG = 0
+	CFLAGS += -Wno-deprecated-declarations
 endif
-endif
+DDEBUG=-DDEBUG=${DEBUG}
 
 all: adblock.so wyebab librun.o testrun
 
@@ -46,9 +42,14 @@ install: all
 	install -Dm755 wyebab     $(DESTDIR)/usr/bin/wyebab
 	install -Dm755 adblock.so $(EXTENSION_DIR)/adblock.so
 
-re: clean all
-
 uninstall:
 	rm -f  $(DESTDIR)/usr/bin/wyebab
 	rm -f  $(EXTENSION_DIR)/adblock.so
 	-rmdir $(EXTENSION_DIR)
+
+
+re: clean all
+#	$(MAKE) clean
+#	$(MAKE) all
+
+full: re install
