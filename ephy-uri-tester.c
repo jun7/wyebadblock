@@ -24,22 +24,23 @@
  *  at http://www.twotoasts.de
  */
 
-//#include "config.h"
+#define LOG(...)
+/*
+#include "config.h"
+*/
 #include "ephy-uri-tester.h"
 
-//#include "ephy-debug.h"
-//#include "ephy-prefs.h"
-//#include "ephy-settings.h"
-//#include "ephy-uri-tester-shared.h"
+/*
+#include "ephy-debug.h"
+#include "ephy-prefs.h"
+#include "ephy-settings.h"
+#include "ephy-uri-tester-shared.h"
+*/
 
 #include <gio/gio.h>
 #include <glib/gstdio.h>
 #include <libsoup/soup.h>
 #include <string.h>
-
-#ifdef HAVE_LIBHTTPSEVERYWHERE
-#include <httpseverywhere.h>
-#endif
 
 #define SIGNATURE_SIZE 8
 
@@ -69,11 +70,6 @@ struct _EphyUriTester {
   GMainLoop *load_loop;
   int adblock_filters_to_load;
   gboolean adblock_loaded;
-#ifdef HAVE_LIBHTTPSEVERYWHERE
-  gboolean https_everywhere_loaded;
-
-  HTTPSEverywhereContext *https_everywhere_context;
-#endif
 };
 
 enum {
@@ -111,10 +107,10 @@ ephy_uri_tester_check_rule (EphyUriTester *tester,
       return FALSE;
   }
   /* TODO: Domain and document opt check */
-//  if (whitelist)
-//    LOG ("whitelisted by pattern regexp=%s -- %s", g_regex_get_pattern (regex), req_uri);
-//  else
-//    LOG ("blocked by pattern regexp=%s -- %s", g_regex_get_pattern (regex), req_uri);
+  if (whitelist)
+    LOG ("whitelisted by pattern regexp=%s -- %s", g_regex_get_pattern (regex), req_uri);
+  else
+    LOG ("blocked by pattern regexp=%s -- %s", g_regex_get_pattern (regex), req_uri);
   return TRUE;
 }
 
@@ -216,7 +212,6 @@ static GString *
 ephy_uri_tester_fixup_regexp (const char *prefix, char *src)
 {
   GString *str;
-  int len = 0;
 
   if (!src)
     return NULL;
@@ -228,25 +223,55 @@ ephy_uri_tester_fixup_regexp (const char *prefix, char *src)
     (void)*src++;
   }
 
+  /* NOTE: The '$' is used as separator for the rule options, so rule patterns
+     cannot ever contain them. If a rule needs to match it, it uses "%24".
+     Splitting the option is done in ephy_uri_tester_add_url_pattern().
+
+     The loop below always escapes square brackets. This way there is no chance
+     that they get interpreted as a character class, and it is NOT needed to
+     escape '-' because it's only special inside a character class. */
   do {
     switch (*src) {
       case '*':
         g_string_append (str, ".*");
         break;
-      /*case '.':
-         g_string_append (str, "\\.");
-         break;*/
+      case '^':
+      /* Matches a separator character, defined as:
+       * "anything but a letter, a digit, or one of the following: _ - . %" */
+        g_string_append (str, "([^a-zA-Z\\d]|[_\\-\\.%])");
+        break;
+      case '|':
+      /* If at the end of the pattern, the match is anchored at the end. In
+       * the middle of a pattern it matches a literal vertical bar and the
+       * character must be escaped. */
+        if (src[1] == '\0')
+          g_string_append (str, "$");
+        else
+          g_string_append (str, "\\|");
+        break;
+      /* The following characters are escaped as they have a meaning in
+       * regular expressions:
+       *   - '.' matches any character.
+       *   - '+' matches the preceding pattern one or more times.
+       *   - '?' matches the preceding pattern zero or one times.
+       *   - '[' ']' are used to define a character class.
+       *   - '{' '}' are used to define a min/max quantifier.
+       *   - '(' ')' are used to defin a submatch expression.
+       *   - '\' has several uses in regexps (shortcut character classes.
+       *     matching non-printing characters, using octal/hex, octal
+       *     constants, backreferences... they must to be escaped to
+       *     match a literal backslash and prevent wrecking havoc!). */
+      case '.':
+      case '+':
       case '?':
       case '[':
       case ']':
+      case '{':
+      case '}':
+      case '(':
+      case ')':
+      case '\\':
         g_string_append_printf (str, "\\%c", *src);
-        break;
-      case '|':
-      /* FIXME: We actually need to match :[0-9]+ or '/'. Sign means
-         "here could be port number or nothing". So bla.com^ will match
-         bla.com/ or bla.com:8080/ but not bla.com.au/ */
-      case '^':
-      case '+':
         break;
       default:
         g_string_append_printf (str, "%c", *src);
@@ -254,11 +279,6 @@ ephy_uri_tester_fixup_regexp (const char *prefix, char *src)
     }
     src++;
   } while (*src);
-
-  len = str->len;
-  /* We dont need .* in the end of url. Thats stupid */
-  if (str->str && str->str[len - 1] == '*' && str->str[len - 2] == '.')
-    g_string_erase (str, len - 2, 2);
 
   return str;
 }
@@ -310,14 +330,14 @@ ephy_uri_tester_compile_regexp (EphyUriTester *tester,
       sig = g_strndup (patt + pos, SIGNATURE_SIZE);
       if (!strchr (sig, '*') &&
           !g_hash_table_lookup (keys, sig)) {
-//        LOG ("sig: %s %s", sig, patt);
+        LOG ("sig: %s %s", sig, patt);
         g_hash_table_insert (keys, g_strdup (sig), g_regex_ref (regex));
         g_hash_table_insert (optslist, g_strdup (sig), g_strdup (opts));
         signature_count++;
       } else {
         if (sig[0] == '*' &&
             !g_hash_table_lookup (pattern, patt)) {
-//          LOG ("patt2: %s %s", sig, patt);
+          LOG ("patt2: %s %s", sig, patt);
           g_hash_table_insert (pattern, g_strdup (patt), g_regex_ref (regex));
           g_hash_table_insert (optslist, g_strdup (patt), g_strdup (opts));
         }
@@ -329,7 +349,7 @@ ephy_uri_tester_compile_regexp (EphyUriTester *tester,
     if (signature_count > 1 && g_hash_table_lookup (pattern, patt))
       g_hash_table_remove (pattern, patt);
   } else {
-//    LOG ("patt: %s%s", patt, "");
+    LOG ("patt: %s%s", patt, "");
     /* Pattern is a regexp chars */
     g_hash_table_insert (pattern, g_strdup (patt), regex);
     g_hash_table_insert (optslist, g_strdup (patt), g_strdup (opts));
@@ -376,10 +396,10 @@ ephy_uri_tester_add_url_pattern (EphyUriTester *tester,
 
   format_patt = ephy_uri_tester_fixup_regexp (prefix, patt);
 
-//  if (whitelist)
-//    LOG ("whitelist: %s opts %s", format_patt->str, opts);
-//  else
-//    LOG ("blacklist: %s opts %s", format_patt->str, opts);
+  if (whitelist)
+    LOG ("whitelist: %s opts %s", format_patt->str, opts);
+  else
+    LOG ("blacklist: %s opts %s", format_patt->str, opts);
 
   ephy_uri_tester_compile_regexp (tester, format_patt, opts, whitelist);
 
@@ -395,6 +415,10 @@ ephy_uri_tester_add_url_pattern (EphyUriTester *tester,
 static inline void
 ephy_uri_tester_frame_add (EphyUriTester *tester, char *line)
 {
+/*
+  const char *separator = " , ";
+*/
+//for wyeb
   const char *separator = ",\n";
 
   (void)*line++;
@@ -514,24 +538,9 @@ ephy_uri_tester_adblock_loaded (EphyUriTester *tester)
 {
   if (g_atomic_int_dec_and_test (&tester->adblock_filters_to_load)) {
     tester->adblock_loaded = TRUE;
-#ifdef HAVE_LIBHTTPSEVERYWHERE
-    if (tester->https_everywhere_loaded)
-      g_main_loop_quit (tester->load_loop);
-#else
     g_main_loop_quit (tester->load_loop);
-#endif
   }
 }
-
-#ifdef HAVE_LIBHTTPSEVERYWHERE
-static void
-ephy_uri_tester_https_everywhere_loaded (EphyUriTester *tester)
-{
-  tester->https_everywhere_loaded = TRUE;
-  if (tester->adblock_loaded)
-    g_main_loop_quit (tester->load_loop);
-}
-#endif
 
 static void
 file_parse_cb (GDataInputStream *stream, GAsyncResult *result, EphyUriTester *tester)
@@ -599,43 +608,17 @@ ephy_uri_tester_block_uri (EphyUriTester *tester,
 char *
 ephy_uri_tester_rewrite_uri (EphyUriTester    *tester,
                              const char       *request_uri,
-                             const char       *page_uri,
-                             EphyUriTestFlags  flags)
+                             const char       *page_uri)
 {
   /* Should we block the URL outright? */
-  if ((flags & EPHY_URI_TEST_ADBLOCK) &&
-      ephy_uri_tester_block_uri (tester, request_uri, page_uri)) {
+  if (ephy_uri_tester_block_uri (tester, request_uri, page_uri)) {
     g_debug ("Request '%s' blocked (page: '%s')", request_uri, page_uri);
 
     return NULL;
   }
 
-#ifdef HAVE_LIBHTTPSEVERYWHERE
-  if ((flags & EPHY_URI_TEST_HTTPS_EVERYWHERE) && tester->https_everywhere_context != NULL)
-    return https_everywhere_context_rewrite (tester->https_everywhere_context, request_uri);
-#endif
-
   return g_strdup (request_uri);
 }
-
-#ifdef HAVE_LIBHTTPSEVERYWHERE
-static void
-https_everywhere_context_init_cb (HTTPSEverywhereContext *context,
-                                  GAsyncResult           *res,
-                                  EphyUriTester          *tester)
-{
-  GError *error = NULL;
-
-  https_everywhere_context_init_finish (context, res, &error);
-
-  if (error) {
-    g_warning ("Failed to initialize HTTPS Everywhere context: %s", error->message);
-    g_error_free (error);
-  }
-
-  ephy_uri_tester_https_everywhere_loaded (tester);
-}
-#endif
 
 static void
 adblock_file_monitor_changed (GFileMonitor     *monitor,
@@ -654,6 +637,7 @@ adblock_file_monitor_changed (GFileMonitor     *monitor,
 }
 
 
+//for wyeb
 static GFile *filter_file;
 
 
@@ -661,15 +645,18 @@ static void
 ephy_uri_tester_begin_loading_adblock_filters (EphyUriTester  *tester,
                                                GList         **monitors)
 {
-//  char **filters;
-
-//  filters = g_settings_get_strv (EPHY_SETTINGS_WEB, EPHY_PREFS_WEB_ADBLOCK_FILTERS);
-//  tester->adblock_filters_to_load = g_strv_length (filters);
+//for wyeb
 tester->adblock_filters_to_load = 1;
-//  for (guint i = 0; filters[i]; i++) {
-//    GFile *filter_file;
+/*
+  char **filters;
 
-//    filter_file = ephy_uri_tester_get_adblock_filter_file ( tester->adblock_data_dir, filters[i]);
+  filters = g_settings_get_strv (EPHY_SETTINGS_MAIN, EPHY_PREFS_ADBLOCK_FILTERS);
+  tester->adblock_filters_to_load = g_strv_length (filters);
+  for (guint i = 0; filters[i]; i++) {
+    GFile *filter_file;
+
+    filter_file = ephy_uri_tester_get_adblock_filter_file (tester->adblock_data_dir, filters[i]);
+*/
     if (!g_file_query_exists (filter_file, NULL)) {
       GFileMonitor *monitor;
       GError *error = NULL;
@@ -688,9 +675,11 @@ tester->adblock_filters_to_load = 1;
                          (GAsyncReadyCallback)file_read_cb,
                          tester);
     }
-//    g_object_unref (filter_file);
-//  }
-//  g_strfreev (filters);
+/*
+    g_object_unref (filter_file);
+  }
+  g_strfreev (filters);
+*/
 }
 
 static void
@@ -703,16 +692,6 @@ ephy_uri_tester_load_sync (GTask         *task,
   context = g_main_context_new ();
   g_main_context_push_thread_default (context);
   tester->load_loop = g_main_loop_new (context, FALSE);
-
-#ifdef HAVE_LIBHTTPSEVERYWHERE
-  if (!tester->https_everywhere_loaded) {
-    g_assert (tester->https_everywhere_context == NULL);
-    tester->https_everywhere_context = https_everywhere_context_new ();
-    https_everywhere_context_init (tester->https_everywhere_context, NULL,
-                                   (GAsyncReadyCallback)https_everywhere_context_init_cb,
-                                   tester);
-  }
-#endif
 
   if (!tester->adblock_loaded)
     ephy_uri_tester_begin_loading_adblock_filters (tester, &monitors);
@@ -730,7 +709,7 @@ ephy_uri_tester_load_sync (GTask         *task,
 static void
 ephy_uri_tester_init (EphyUriTester *tester)
 {
-//  LOG ("EphyUriTester initializing %p", tester);
+  LOG ("EphyUriTester initializing %p", tester);
 
   tester->pattern = g_hash_table_new_full (g_str_hash, g_str_equal,
                                            (GDestroyNotify)g_free,
@@ -798,27 +777,11 @@ ephy_uri_tester_set_property (GObject      *object,
 }
 
 static void
-ephy_uri_tester_dispose (GObject *object)
-{
-#ifdef HAVE_LIBHTTPSEVERYWHERE
-  EphyUriTester *tester = EPHY_URI_TESTER (object);
-#endif
-
-//  LOG ("EphyUriTester disposing %p", object);
-
-#ifdef HAVE_LIBHTTPSEVERYWHERE
-  g_clear_object (&tester->https_everywhere_context);
-#endif
-
-  G_OBJECT_CLASS (ephy_uri_tester_parent_class)->dispose (object);
-}
-
-static void
 ephy_uri_tester_finalize (GObject *object)
 {
   EphyUriTester *tester = EPHY_URI_TESTER (object);
 
-//  LOG ("EphyUriTester finalizing %p", object);
+  LOG ("EphyUriTester finalizing %p", object);
 
   g_free (tester->adblock_data_dir);
 
@@ -849,7 +812,6 @@ ephy_uri_tester_class_init (EphyUriTesterClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   object_class->set_property = ephy_uri_tester_set_property;
-  object_class->dispose = ephy_uri_tester_dispose;
   object_class->finalize = ephy_uri_tester_finalize;
 
   obj_properties[PROP_ADBLOCK_DATA_DIR] =
@@ -870,9 +832,7 @@ ephy_uri_tester_new (const char *adblock_data_dir)
 
 /*
 static void
-ephy_uri_tester_adblock_filters_changed_cb (GSettings     *settings,
-                                            char          *key,
-                                            EphyUriTester *tester)
+ephy_uri_tester_reload_adblock_filters (EphyUriTester *tester)
 {
   g_hash_table_remove_all (tester->pattern);
   g_hash_table_remove_all (tester->keys);
@@ -887,35 +847,61 @@ ephy_uri_tester_adblock_filters_changed_cb (GSettings     *settings,
   tester->adblock_loaded = FALSE;
   ephy_uri_tester_load (tester);
 }
+
+static void
+ephy_uri_tester_adblock_filters_changed_cb (GSettings     *settings,
+                                            char          *key,
+                                            EphyUriTester *tester)
+{
+  ephy_uri_tester_reload_adblock_filters (tester);
+}
+
+static void
+ephy_uri_tester_enable_adblock_changed_cb (GSettings     *settings,
+                                           char          *key,
+                                           EphyUriTester *tester)
+{
+  ephy_uri_tester_reload_adblock_filters (tester);
+}
 */
 
 void
 ephy_uri_tester_load (EphyUriTester *tester)
 {
   GTask *task;
-//  char **trash;
+/*
+  char **trash;
 
-  g_return_if_fail (EPHY_IS_URI_TESTER (tester));
+  g_assert (EPHY_IS_URI_TESTER (tester));
 
-  if (tester->adblock_loaded
-#ifdef HAVE_LIBHTTPSEVERYWHERE
-      && tester->https_everywhere_loaded
-#endif
-     )
+  if (!g_settings_get_boolean (EPHY_SETTINGS_WEB, EPHY_PREFS_WEB_ENABLE_ADBLOCK))
+    tester->adblock_loaded = TRUE;
+*/
+
+  if (tester->adblock_loaded)
     return;
 
-//  g_signal_handlers_disconnect_by_func (EPHY_SETTINGS_WEB, ephy_uri_tester_adblock_filters_changed_cb, tester);
+/*
+  g_signal_handlers_disconnect_by_func (EPHY_SETTINGS_WEB, ephy_uri_tester_adblock_filters_changed_cb, tester);
+  g_signal_handlers_disconnect_by_func (EPHY_SETTINGS_WEB, ephy_uri_tester_enable_adblock_changed_cb, tester);
+*/
 
   task = g_task_new (tester, NULL, NULL, NULL);
   g_task_run_in_thread_sync (task, (GTaskThreadFunc)ephy_uri_tester_load_sync);
   g_object_unref (task);
 
-//  g_signal_connect (EPHY_SETTINGS_WEB, "changed::adblock-filters",
-//                    G_CALLBACK (ephy_uri_tester_adblock_filters_changed_cb), tester);
+/*
+  g_signal_connect (EPHY_SETTINGS_MAIN, "changed::" EPHY_PREFS_ADBLOCK_FILTERS,
+                    G_CALLBACK (ephy_uri_tester_adblock_filters_changed_cb), tester);
+  g_signal_connect (EPHY_SETTINGS_WEB, "changed::" EPHY_PREFS_WEB_ENABLE_ADBLOCK,
+                    G_CALLBACK (ephy_uri_tester_enable_adblock_changed_cb), tester);
+*/
   /* GSettings never emits the changed signal until after we read the setting
    * the first time after connecting the handler... work around this.*/
-//  trash = g_settings_get_strv (EPHY_SETTINGS_WEB, "adblock-filters");
-//  g_strfreev (trash);
+/*
+  trash = g_settings_get_strv (EPHY_SETTINGS_MAIN, EPHY_PREFS_ADBLOCK_FILTERS);
+  g_strfreev (trash);
+*/
 }
 
 
@@ -1062,8 +1048,8 @@ static char *datafunc(char *req)
 	//req uri + ' ' + page uri
 	char **args = g_strsplit(req, " ", 2);
 
-	char *ret = !tester ? g_strdup(args[0]) : ephy_uri_tester_rewrite_uri(tester,
-			args[0],  args[1] ?: args[0], EPHY_URI_TEST_ADBLOCK);
+	char *ret = !tester ? g_strdup(args[0]) :
+		ephy_uri_tester_rewrite_uri(tester, args[0],  args[1] ?: args[0]);
 
 	g_strfreev(args);
 
