@@ -33,7 +33,10 @@ set string "adblock:false;" as the user data of the
 webkit_web_context_set_web_extensions_initialization_user_data;
 
 Runtime:
+
 	g_object_set_data(G_OBJECT(webkitwebpage), "adblock", GINT_TO_POINTER('n'));
+
+in any extension.
 
 
 ---
