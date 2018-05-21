@@ -945,7 +945,8 @@ static gboolean reqcb(WebKitWebPage *page, WebKitURIRequest *req,
 	char *ruri = wyebreq(EXE, uris);
 	g_free(uris);
 
-	if (!ruri) return true;
+	if (!ruri) return false; //wyebab failed
+	if (!*ruri) return true;
 
 	if (g_strcmp0(requri, ruri))
 		webkit_uri_request_set_uri(req, ruri);
