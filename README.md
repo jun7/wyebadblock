@@ -39,6 +39,13 @@ webkit_web_context_set_web_extensions_initialization_user_data;
 ## For webkit2gtk browsers
 On Arch Linux
 
+### epiphany
+
+	sudo ln -s /usr/lib/wyebrowser/adblock.so /usr/lib64/epiphany/web-extensions
+
+This lacks epiphany's functionalities about adblock (e.g. can't disable), but saves RAM and CPU.
+Make sure while you keep enable epiphany's one, it is working too.
+
 ### surf
 	sudo mkdir usr/local/lib/surf
 	sudo ln -s /usr/lib/wyebrowser/adblock.so /usr/local/lib/surf
@@ -53,7 +60,7 @@ There is a PKGBUILD file. see the 'PKGBULDs' dir.
 
 ### luakit
 
-	sudo ln -s /lib/wyebrowser/adblock.so /lib/luakit
+	sudo ln -s /usr/lib/wyebrowser/adblock.so /lib/luakit
 
 ### lariza
 
