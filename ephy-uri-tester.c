@@ -930,6 +930,9 @@ static bool first = true;
 static gboolean reqcb(WebKitWebPage *page, WebKitURIRequest *req,
 		WebKitURIResponse *r, gpointer p)
 {
+	if (g_object_get_data(G_OBJECT(page), "adblock") == (gpointer)'n')
+		return false;
+
 	const char *requri  = webkit_uri_request_get_uri(req);
 	const char *pageuri = webkit_web_page_get_uri(page);
 
@@ -953,7 +956,6 @@ static gboolean reqcb(WebKitWebPage *page, WebKitURIRequest *req,
 
 	return false;
 }
-
 
 static void pageinit(WebKitWebExtension *ex, WebKitWebPage *wp)
 {
