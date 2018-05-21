@@ -966,31 +966,28 @@ static void pageinit(WebKitWebExtension *ex, WebKitWebPage *wp)
 G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 		WebKitWebExtension *ex, const GVariant *v)
 {
-	bool enable = true;
 	bool hasarg = false;
-	if (v && g_variant_is_of_type((GVariant *)v, G_VARIANT_TYPE_STRING))
+	const char *str;
+	if (v && g_variant_is_of_type((GVariant *)v, G_VARIANT_TYPE_STRING) &&
+		(str = g_variant_get_string((GVariant *)v, NULL)))
 	{
-		const char *str = g_variant_get_string((GVariant *)v, NULL);
-		if (str)
-		{
-			char **args = g_strsplit(str, ";", -1);
-			for (char **arg = args; *arg; arg++)
-				if (g_str_has_prefix(*arg, "adblock:"))
-				{
-					enable = strcmp(*arg + 8, "true") == 0;
-					hasarg = true;
-				}
-			g_strfreev(args);
-		}
+		bool enable = true;
+		char **args = g_strsplit(str, ";", -1);
+		for (char **arg = args; *arg; arg++)
+			if (g_str_has_prefix(*arg, "adblock:"))
+			{
+				enable = !strcmp(*arg + 8, "true");
+				hasarg = true;
+			}
+		g_strfreev(args);
+		if (!enable) return;
 	}
-	if (!hasarg && *(g_getenv("DISABLE_ADBLOCK") ?: "") != '\0')
-		enable = false;
 
-	if (enable)
-	{
-		wyebloop(EXE, 30, 24);
-		g_signal_connect(ex, "page-created", G_CALLBACK(pageinit), NULL);
-	}
+	if (!hasarg && *(g_getenv("DISABLE_ADBLOCK") ?: "") != '\0')
+		return;
+
+	wyebloop(EXE, 30, 24);
+	g_signal_connect(ex, "page-created", G_CALLBACK(pageinit), NULL);
 }
 
 #endif
