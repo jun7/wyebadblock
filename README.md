@@ -99,5 +99,5 @@ blank + enter quits.
 
 	wyebab requst_uri + ' ' + page_uri
 
-Outputs result
+Outputs result and
 Keeps server 30 sec
