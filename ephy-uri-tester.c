@@ -939,7 +939,7 @@ static bool check(const char *requri, const char *pageuri)
 static gboolean reqcb(WebKitWebPage *page, WebKitURIRequest *req,
 		WebKitURIResponse *r, gpointer p)
 {
-	if (g_object_get_data(G_OBJECT(page), "wyebab") == (gpointer)'n')
+	if (g_object_get_data(G_OBJECT(page), "adblock") == (gpointer)'n')
 		return false;
 
 	const char *requri  = webkit_uri_request_get_uri(req);
@@ -954,20 +954,18 @@ static gboolean reqcb(WebKitWebPage *page, WebKitURIRequest *req,
 	}
 
 	if (check(requri, pageuri)) return false;
-
-	void (*rf)(gpointer p, const char *) =
-		g_object_get_data(G_OBJECT(page), "blockedreport");
-	if (rf)
-		rf(g_object_get_data(G_OBJECT(page), "blockedreportto"), requri);
 	return true;
 }
 
+static bool useapi = false;
 static void pageinit(WebKitWebExtension *ex, WebKitWebPage *wp)
 {
 	DD(pageinit)
-	g_signal_connect(wp, "send-request", G_CALLBACK(reqcb), NULL);
 
-	g_object_set_data(G_OBJECT(wp), "wyebabcheck", check);
+	if (!useapi)
+		g_signal_connect(wp, "send-request", G_CALLBACK(reqcb), NULL);
+
+	g_object_set_data(G_OBJECT(wp), "wyebcheck", check);
 }
 
 G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
@@ -981,11 +979,15 @@ G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 		bool enable = true;
 		char **args = g_strsplit(str, ";", -1);
 		for (char **arg = args; *arg; arg++)
+		{
 			if (g_str_has_prefix(*arg, "adblock:"))
 			{
 				enable = !strcmp(*arg + 8, "true");
 				hasarg = true;
 			}
+			if (!strcmp(*arg, "wyebabapi"))
+				useapi = true;
+		}
 		g_strfreev(args);
 		if (!enable) return;
 	}
