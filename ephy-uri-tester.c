@@ -1,5 +1,4 @@
 /*
- *  Copyright 2017-2018 jun7
  *  Copyright © 2011 Igalia S.L.
  *
  *  This file is part of Epiphany.
