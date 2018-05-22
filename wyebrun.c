@@ -486,7 +486,7 @@ gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 
 	Com type  = *unesc;
 	char *id  = unesc + 1;
-	char *arg = strstr(unesc, ":");
+	char *arg = strchr(unesc, ':');
 	*arg++ = '\0';
 
 #if DEBUG
