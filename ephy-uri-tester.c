@@ -957,15 +957,30 @@ static gboolean reqcb(WebKitWebPage *page, WebKitURIRequest *req,
 	return true;
 }
 
-static bool useapi = false;
-static void pageinit(WebKitWebExtension *ex, WebKitWebPage *wp)
+static gboolean untilcb(WebKitWebPage *kp)
+{
+	if (g_object_get_data(G_OBJECT(kp), "adblock") != (gpointer)'n')
+		wyebuntil(EXE, 30);
+	return true;
+}
+
+static bool apimode = false;
+static void pageinit(WebKitWebExtension *ex, WebKitWebPage *kp)
 {
 	DD(pageinit)
 
-	if (!useapi)
-		g_signal_connect(wp, "send-request", G_CALLBACK(reqcb), NULL);
+	if (!apimode)
+		g_signal_connect(kp, "send-request", G_CALLBACK(reqcb), NULL);
 
-	g_object_set_data(G_OBJECT(wp), "wyebcheck", check);
+	g_object_set_data(G_OBJECT(kp), "wyebcheck", check);
+
+	untilcb(kp);
+
+	//to catch destroy event in shared proc, set loop srcs to the pages
+	//make sure shared proc is not only the multi web proc but target=_blank or js
+	g_object_set_data_full(G_OBJECT(kp), "wyebloop",
+			GUINT_TO_POINTER(g_timeout_add(11 * 1000, (GSourceFunc)untilcb, kp)),
+			(GDestroyNotify)g_source_remove);
 }
 
 G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
@@ -986,7 +1001,7 @@ G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 				hasarg = true;
 			}
 			if (!strcmp(*arg, "wyebabapi"))
-				useapi = true;
+				apimode = true;
 		}
 		g_strfreev(args);
 		if (!enable) return;
@@ -995,7 +1010,6 @@ G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 	if (!hasarg && *(g_getenv("DISABLE_ADBLOCK") ?: "") != '\0')
 		return;
 
-	wyebloop(EXE, 30, 24);
 	g_signal_connect(ex, "page-created", G_CALLBACK(pageinit), NULL);
 }
 
