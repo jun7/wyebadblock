@@ -364,44 +364,53 @@ void wyebsend(char *exe, char *req)
 {
 	request(exe, CSdata, NULL, req);
 }
-void wyebuntil(char *exe, int sec)
+typedef struct {
+	char *exe;
+	int   sec;
+} wyebsst;
+static void wsfree(wyebsst *ss)
+{
+	g_free(ss->exe);
+	g_free(ss);
+}
+static gboolean untilcb(wyebsst *ss)
 {
 	if (!lastsec)
 		lastsec = g_hash_table_new(g_str_hash, g_str_equal);
 
-	g_hash_table_replace(lastsec, exe, GINT_TO_POINTER(sec));
+	g_hash_table_replace(lastsec, ss->exe, GINT_TO_POINTER(ss->sec));
 
-	char *str = g_strdup_printf("%d", sec);
-	request(exe, CSuntil, NULL, str);
+	char *str = g_strdup_printf("%d", ss->sec);
+	request(ss->exe, CSuntil, NULL, str);
 	g_free(str);
+
+	return false;
+}
+void wyebuntil(char *exe, int sec)
+{
+	wyebsst *ss = g_new(wyebsst, 1);
+	ss->exe = g_strdup(exe);
+	ss->sec = sec;
+	g_idle_add_full(G_PRIORITY_DEFAULT, (GSourceFunc)untilcb,
+			ss, (GDestroyNotify)wsfree);
 }
 
-typedef struct {
-	char *exe;
-	int   sec;
-} wyebloopt;
-static void wlfree(wyebloopt *wl)
+static gboolean loopcb(wyebsst *ss)
 {
-	g_free(wl->exe);
-	g_free(wl);
-}
-static gboolean loopcb(wyebloopt *wl)
-{
-	wyebuntil(wl->exe, wl->sec);
+	untilcb(ss);
 	return true;
 }
 guint wyebloop(char *exe, int sec, int loopsec)
 {
-	wyebloopt *wl = g_new(wyebloopt, 1);
-	wl->exe = g_strdup(exe);
-	wl->sec = sec;
+	wyebsst *ss = g_new(wyebsst, 1);
+	ss->exe = g_strdup(exe);
+	ss->sec = sec;
 
-	loopcb(wl);
+	loopcb(ss);
 	return g_timeout_add_full(G_PRIORITY_DEFAULT,
 			loopsec * 1000,
 			(GSourceFunc)loopcb,
-			wl,
-			(GDestroyNotify)wlfree);
+			ss, (GDestroyNotify)wsfree);
 }
 
 static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
