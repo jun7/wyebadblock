@@ -927,10 +927,19 @@ ephy_uri_tester_load (EphyUriTester *tester)
 
 #include <webkit2/webkit-web-extension.h>
 static bool first = true;
+static bool check(const char *requri, const char *pageuri)
+{
+	char *uris = g_strconcat(requri, " ", pageuri, NULL);
+	char *ruri = wyebreq(EXE, uris);
+	g_free(uris);
+
+	if (ruri && !*ruri) return false;
+	return true;
+}
 static gboolean reqcb(WebKitWebPage *page, WebKitURIRequest *req,
 		WebKitURIResponse *r, gpointer p)
 {
-	if (g_object_get_data(G_OBJECT(page), "adblock") == (gpointer)'n')
+	if (g_object_get_data(G_OBJECT(page), "wyebab") == (gpointer)'n')
 		return false;
 
 	const char *requri  = webkit_uri_request_get_uri(req);
@@ -944,23 +953,21 @@ static gboolean reqcb(WebKitWebPage *page, WebKitURIRequest *req,
 			return false;
 	}
 
-	char *uris = g_strconcat(requri, " ", pageuri, NULL);
-	char *ruri = wyebreq(EXE, uris);
-	g_free(uris);
+	if (check(requri, pageuri)) return false;
 
-	if (!ruri) return false; //wyebab failed
-	if (!*ruri) return true;
-
-	if (g_strcmp0(requri, ruri))
-		webkit_uri_request_set_uri(req, ruri);
-
-	return false;
+	void (*rf)(gpointer p, const char *) =
+		g_object_get_data(G_OBJECT(page), "blockedreport");
+	if (rf)
+		rf(g_object_get_data(G_OBJECT(page), "blockedreportto"), requri);
+	return true;
 }
 
 static void pageinit(WebKitWebExtension *ex, WebKitWebPage *wp)
 {
 	DD(pageinit)
 	g_signal_connect(wp, "send-request", G_CALLBACK(reqcb), NULL);
+
+	g_object_set_data(G_OBJECT(wp), "wyebabcheck", check);
 }
 
 G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(

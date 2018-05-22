@@ -415,18 +415,25 @@ static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
 		exit(0);
 
 #if DEBUG
-	if (!strcmp(line, "l"))
+	if (g_str_has_prefix(line, "l"))
 	{
 		start = g_get_monotonic_time();
-		for (int i = 0; i < 10000; i++)
+		for (int i = 0; i < 1000; i++)
 		{
 			char *is = g_strdup_printf("l%d", i);
 			//g_print("loop %d ret %s\n", i, wyebreq(exe, is));
-			wyebreq(exe, is);
+			if (*(line + 1) == 's')
+				wyebsend(exe, is);
+			else if (*(line + 1) == 'p')
+				D(pint %s, is)
+			else
+				wyebreq(exe, is);
 			g_free(is);
 		}
 		gint64 now = g_get_monotonic_time();
-		D(time %f, (now - start) / 1000000.0)
+		char *time = g_strdup_printf("time %f", (now - start) / 1000000.0);
+		wyebsend(exe, time);
+		g_free(time);
 	}
 	else
 		g_print("RET is %s\n", wyebreq(exe, line));
