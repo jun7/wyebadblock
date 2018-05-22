@@ -1,4 +1,22 @@
-//added
+/*
+Copyright 2018 jun7@hush.mail
+
+This file is part of wyebadblock.
+
+wyebadblock is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+wyebadblock is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with wyebadblock.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "wyebrun.h"
 
 #define EXE "wyebab"
@@ -24,14 +42,11 @@ static bool check(const char *requri, const char *pageuri)
 	if (ruri && !*ruri) return false;
 	return true;
 }
-static gboolean reqcb(WebKitWebPage *page, WebKitURIRequest *req,
+static gboolean reqcb(WebKitWebPage *kp, WebKitURIRequest *req,
 		WebKitURIResponse *r, gpointer p)
 {
-	if (g_object_get_data(G_OBJECT(page), "adblock") == (gpointer)'n')
+	if (g_object_get_data(G_OBJECT(kp), "adblock") == (gpointer)'n')
 		return false;
-
-	const char *requri  = webkit_uri_request_get_uri(req);
-	const char *pageuri = webkit_web_page_get_uri(page);
 
 	if (first)
 	{
@@ -41,7 +56,8 @@ static gboolean reqcb(WebKitWebPage *page, WebKitURIRequest *req,
 			return false;
 	}
 
-	if (check(requri, pageuri)) return false;
+	if (check(webkit_uri_request_get_uri(req),
+				webkit_web_page_get_uri(kp))) return false;
 	return true;
 }
 
@@ -105,8 +121,6 @@ G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 
 #include "ephy-uri-tester.h"
 #include "ephy-uri-tester.c"
-
-
 
 static EphyUriTester *tester = NULL;
 static GThread *initt = NULL;
