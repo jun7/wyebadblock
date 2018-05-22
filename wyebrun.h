@@ -20,6 +20,8 @@ along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _WYEBRUN_H
 #define _WYEBRUN_H
 
+#include <stdbool.h>
+#include <glib/gstdio.h>
 
 #define WYEBPREFIX "-wyeb"
 #define WYEBDUNTIL 3

@@ -18,10 +18,6 @@ along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-#include <stdbool.h>
-#include <stdlib.h>
-#include <glib/gstdio.h>
-
 //getpid
 #include <sys/types.h>
 #include <unistd.h>
