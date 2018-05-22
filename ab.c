@@ -19,8 +19,6 @@ along with wyebadblock.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "wyebrun.h"
 
-#define EXE "wyebab"
-
 #if DEBUG
 # define D(f, ...) g_print("#"#f"\n", __VA_ARGS__);
 # define DD(a) g_print("#"#a"\n");
@@ -29,7 +27,10 @@ along with wyebadblock.  If not, see <http://www.gnu.org/licenses/>.
 # define DD(a) ;
 #endif
 
+
 #if ISEXT
+
+#define EXE "wyebab"
 
 #include <webkit2/webkit-web-extension.h>
 static bool first = true;
@@ -116,6 +117,8 @@ G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 
 	g_signal_connect(ex, "page-created", G_CALLBACK(pageinit), NULL);
 }
+
+
 
 #else
 
