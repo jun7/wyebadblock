@@ -102,7 +102,7 @@ If you want full control of wyebab as wyeb does, wyebab has api mode.
 Set string ";wyebabapi;" as the extensions_init's data.
 In api mode wyebab doesn't block URIs but keeps alive server proc and
 set the check function to the page object.
-So you can call the check func at where ever as below.
+So you can call the check func where ever as below.
 
 	bool (*checkf)(const char *, const char *) =
 		g_object_get_data(G_OBJECT(webkitwebpage), "wyebcheck");
