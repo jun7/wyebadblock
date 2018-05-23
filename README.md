@@ -89,7 +89,8 @@ Setting chars(whatever) to the env value $DISABLE_ADBLOCK disables adblock.
 set string ";adblock:false;" as the user data of the
 webkit_web_context_set_web_extensions_initialization_user_data;
 
-Runtime:
+
+#### Runtime
 
 	g_object_set_data(G_OBJECT(webkitwebpage), "adblock", GINT_TO_POINTER('n'));
 
@@ -124,4 +125,4 @@ blank + enter quits.
 	wyebab requst_uri + ' ' + page_uri
 
 Outputs result and
-Keeps server 30 sec
+Keeps server 30 sec.
