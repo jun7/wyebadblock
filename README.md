@@ -95,6 +95,8 @@ Runtime:
 
 in any extension.
 
+####Full Control
+
 If you want full control of wyebab as wyeb does, wyebab has api mode.
 Set string ";wyebabapi;" as the extensions_init's data.
 In api mode wyebab doesn't block URIs but keeps alive server proc and
