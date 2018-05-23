@@ -28,7 +28,7 @@ along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 
 //client
 //wyebrun spawns the exe if wyebsend failes
-char *wyebreq(   char *exe, char *req);
+char *wyebreq(   char *exe, char *req); //don't free the ret val
 void  wyebsend(  char *exe, char *req);
 void  wyebuntil( char *exe, int   sec); //keep alive. default is 3s
 //loop the wyebuntil. to stop, use g_source_remove
