@@ -85,7 +85,7 @@ Make sure the huge css takes mamory a lot.
 
 Setting chars(whatever) to the env value $DISABLE_ADBLOCK disables adblock.
 
-###For source code:
+### For source code:
 set string ";adblock:false;" as the user data of the
 webkit_web_context_set_web_extensions_initialization_user_data;
 
@@ -95,7 +95,7 @@ Runtime:
 
 in any extension.
 
-####Full Control
+#### Full Control
 
 If you want full control of wyebab as wyeb does, wyebab has api mode.
 Set string ";wyebabapi;" as the extensions_init's data.
