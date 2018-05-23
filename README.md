@@ -106,7 +106,6 @@ So you can call the check func at where ever as below.
 	if (checkf)
 		passed = checkf(requesturi, pageuri);
 
-I don't keep APIs which no one use, so tell me if you are using it.
 
 or
 
