@@ -185,6 +185,13 @@ static char *datafunc(char *req)
 
 	g_strfreev(args);
 
+#if DEBUG
+	if (ret)
+		D(ret %s, ret)
+	else
+		D(BLOCKED %s, req)
+#endif
+
 	return ret;
 }
 
