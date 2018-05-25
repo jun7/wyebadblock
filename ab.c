@@ -80,12 +80,8 @@ static void pageinit(WebKitWebExtension *ex, WebKitWebPage *kp)
 	g_object_set_data(G_OBJECT(kp), "wyebcheck", check);
 
 	untilcb(kp);
-
-	//to catch destroy event in shared proc, set loop srcs to the pages
-	//make sure shared proc is not only the multi web proc but target=_blank or js
-	g_object_set_data_full(G_OBJECT(kp), "wyebloop",
-			GUINT_TO_POINTER(g_timeout_add(11 * 1000, (GSourceFunc)untilcb, kp)),
-			(GDestroyNotify)g_source_remove);
+	g_object_weak_ref(G_OBJECT(kp), (GWeakNotify)g_source_remove,
+			GUINT_TO_POINTER(g_timeout_add(11 * 1000, (GSourceFunc)untilcb, kp)));
 }
 
 G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
