@@ -307,6 +307,7 @@ static char *request(char *exe, Com type, char *caller, char *req)
 
 		int lock = open(path, O_RDONLY | O_CREAT, S_IRUSR);
 		g_free(path);
+		flock(lock, LOCK_EX);
 
 		//retry in single proc
 		if (!ipcsend(exe, INPUT, type, caller, req))

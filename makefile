@@ -18,7 +18,7 @@ adblock.so: ab.c ephy-uri-tester.c ephy-uri-tester.h librun.o makefile
 
 wyebab: ab.c ephy-uri-tester.c ephy-uri-tester.h librun.o makefile
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< librun.o \
-		`pkg-config --cflags --libs glib-2.0 libsoup-2.4` \
+		`pkg-config --cflags --libs glib-2.0 gio-2.0` \
 		-DEXTENSION_DIR=\"$(EXTENSION_DIR)\" \
 		$(DDEBUG) $(DAPPNAME)
 

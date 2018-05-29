@@ -34,12 +34,12 @@
 #include "ephy-prefs.h"
 #include "ephy-settings.h"
 #include "ephy-uri-tester-shared.h"
-*/
 
 #include <gio/gio.h>
 #include <glib/gstdio.h>
 #include <libsoup/soup.h>
 #include <string.h>
+*/
 
 #define SIGNATURE_SIZE 8
 
