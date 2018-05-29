@@ -38,7 +38,7 @@ clean:
 	rm -f librun.o
 	rm -f testrun
 
-install: all
+install:
 	install -Dm755 wyebab     $(DESTDIR)/usr/bin/wyebab
 	install -Dm755 adblock.so $(EXTENSION_DIR)/adblock.so
 
