@@ -412,7 +412,10 @@ guint wyebloop(char *exe, int sec, int loopsec)
 static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
 {
 	char *line;
-	g_io_channel_read_line(ch, &line, NULL, NULL, NULL);
+
+	if (G_IO_STATUS_EOF == g_io_channel_read_line(ch, &line, NULL, NULL, NULL))
+		exit(0);
+
 	if (!line) return true;
 
 	g_strstrip(line);
