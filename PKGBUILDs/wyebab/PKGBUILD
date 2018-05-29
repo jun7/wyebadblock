@@ -1,13 +1,13 @@
 # Maintainer: jun7 <jun7@hush.com>
-pkgname=wyebadblock-git
+pkgname=wyebab-git
 pkgver=1.1
-pkgrel=6
-pkgdesc="An adblock extension for webkit2gtk browsers."
+pkgrel=1
+pkgdesc="An adblock command using the easylist.txt."
 arch=('x86_64')
-provides=('wyebab-git')
 url="https://github.com/jun7/wyebadblock"
 license=('GPL3')
-depends=('webkit2gtk')
+depends=('glib2')
+conflicts=('wyebadblock-git')
 makedepends=('git')
 _branch=master
 source=("git://github.com/jun7/wyebadblock.git#branch=$_branch")
@@ -27,11 +27,10 @@ prepare() {
 build() {
 	cd "$srcdir/wyebadblock"
 	DEBUG=0
-	make
+	make wyebab
 }
 
 package() {
 	cd "$srcdir/wyebadblock"
 	install -Dm755 wyebab     "$pkgdir/usr/bin/wyebab"
-	install -Dm755 adblock.so "$pkgdir/usr/lib/wyebrowser/adblock.so"
 }
