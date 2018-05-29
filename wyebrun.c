@@ -412,8 +412,8 @@ guint wyebloop(char *exe, int sec, int loopsec)
 static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
 {
 	char *line;
-
-	if (G_IO_STATUS_EOF == g_io_channel_read_line(ch, &line, NULL, NULL, NULL))
+	if (c == G_IO_HUP || G_IO_STATUS_EOF ==
+			g_io_channel_read_line(ch, &line, NULL, NULL, NULL))
 		exit(0);
 
 	if (!line) return true;
@@ -458,7 +458,7 @@ static gboolean tcinit(char *exe)
 	wyebloop(exe, 2, 1);
 
 	GIOChannel *io = g_io_channel_unix_new(fileno(stdin));
-	g_io_add_watch(io, G_IO_IN, (GIOFunc)tcinputcb, exe);
+	g_io_add_watch(io, G_IO_IN | G_IO_HUP, (GIOFunc)tcinputcb, exe);
 
 	return false;
 }
