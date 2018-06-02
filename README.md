@@ -29,6 +29,12 @@ You can check if it works on http://simple-adblock.com/faq/testing-your-adblocke
 ## For webkit2gtk browsers
 On Arch Linux. Make sure on other distros, the paths are may different.
 
+### surfer
+
+See the Surfer's README
+
+https://github.com/nihilowy/surfer
+
 ### epiphany
 
 	sudo ln -s /usr/lib/wyebrowser/adblock.so /usr/lib64/epiphany/web-extensions
