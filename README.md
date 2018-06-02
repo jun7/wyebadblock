@@ -10,7 +10,7 @@ For example, while epiphay's webproc uses 240M RAM for
 [a page](http://simple-adblock.com/faq/testing-your-adblocker/), wyeb uses 160M for the same page.
 Of course the adblock uses 80M but not gain.
 
-Don't worry, wyeb wills quit automatically when there is no client and 30 secs past.
+Don't worry, wyebab wills quit automatically when there is no client and 30 secs past.
 
 ## usage:
 
@@ -46,7 +46,7 @@ Make sure while you keep enable epiphany's one, it is working too.
 	sudo mkdir usr/local/lib/surf
 	sudo ln -s /usr/lib/wyebrowser/adblock.so /usr/local/lib/surf
 
-See vimb below to manage the link by pacman
+There is a PKGBUILD file. see the 'PKGBULDs' dir.
 
 ### vimb
 

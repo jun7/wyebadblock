@@ -1,0 +1,17 @@
+# Maintainer: jun7 <jun7@hush.com>
+pkgname=wyebadblock-surf
+pkgver=1
+pkgrel=1
+pkgdesc="adblock link to wyebadblock for surf."
+arch=('x86_64')
+url="https://github.com/jun7/wyebadblock"
+license=('GPL3')
+depends=('wyebadblock-git' 'surf')
+makedepends=()
+source=()
+
+
+package() {
+	mkdir -p "$pkgdir/usr/local/lib/surf"
+	ln -s /usr/lib/wyebrowser/adblock.so "$pkgdir/usr/local/lib/surf"
+}
