@@ -25,6 +25,9 @@ along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 //flock
 #include <sys/file.h>
 
+//monitor
+#include <gio/gio.h>
+
 #include "wyebrun.h"
 
 #define ROOTNAME "wyebrun"
@@ -57,8 +60,6 @@ typedef enum {
 	CCret   = 'r', //retrun data
 	CClost  = 'l', //we lost the req
 } Com;
-
-
 
 
 
@@ -134,9 +135,11 @@ static GSource *ipcwatch(char *exe, char *name, GMainContext *ctx) {
 static char *svrexe = NULL;
 static GMainLoop *sloop = NULL;
 static wyebdataf dataf = NULL;
+static GHashTable *orders = NULL;
+
 static gboolean quit(gpointer p)
 {
-	DD(\nsvr quits\n)
+	DD(SVR QUITS\n)
 	g_main_loop_quit(sloop);
 	return false;
 }
@@ -156,7 +159,19 @@ static gpointer pingt(gpointer p)
 	g_main_loop_run(g_main_loop_new(ctx, true));
 	return NULL;
 }
-
+static gboolean quitif(gpointer p)
+{
+DD(quitif)
+	static int cnt = 0;
+	if (cnt++ > 30 /*3 sec*/ || !g_hash_table_size(orders)) quit(NULL);
+	return true;
+}
+static void monitorcb(GFileMonitor *m, GFile *f, GFile *o, GFileMonitorEvent e,
+		gpointer p)
+{
+	if (e != G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT) return;
+	g_timeout_add(100, quitif, NULL);
+}
 void wyebwatch(char *exe, char *caller, wyebdataf func)
 {
 	svrexe = exe;
@@ -173,6 +188,16 @@ void wyebwatch(char *exe, char *caller, wyebdataf func)
 static gboolean svrinit(char *caller)
 {
 	wyebwatch(svrexe, caller, dataf);
+
+	char path[PATH_MAX];
+	readlink("/proc/self/exe", path, PATH_MAX);
+	D(exepath %s, path)
+	GFile *gf = g_file_new_for_path(path);
+	GFileMonitor *gm = g_file_monitor_file(
+			gf, G_FILE_MONITOR_NONE, NULL, NULL);
+	g_signal_connect(gm, "changed", G_CALLBACK(monitorcb), NULL);
+	g_object_unref(gf);
+
 	return false;
 }
 
@@ -474,7 +499,6 @@ void wyebclient(char *exe)
 
 
 //@ipccb
-static GHashTable *orders = NULL;
 gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 {
 	if (!orders)
@@ -495,7 +519,7 @@ gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 
 #if DEBUG
 	static int i = 0;
-	D(ipccb%d %c/%s/%s;, i++, type ,id ,arg)
+	D(%c ipccb%d %c/%s/%s;, svrexe ? 'S':'C', i++, type ,id ,arg)
 #endif
 
 	static int lastuntil = DUNTIL;
@@ -548,10 +572,6 @@ int main(int argc, char **argv)
 	start = g_get_monotonic_time();
 //	gint64 now = g_get_monotonic_time();
 //	D(time %ld %ld, now - start, now)
-
-	//char path[PATH_MAX] = {0};
-	//readlink("/proc/self/exe", path, PATH_MAX);
-	//D(progrname %s, path)
 
 	if (!wyebsvr(argc, argv, testdata))
 		wyebclient(argv[0]);

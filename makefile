@@ -29,7 +29,7 @@ librun.o: wyebrun.c wyebrun.h makefile
 
 testrun: wyebrun.c wyebrun.h makefile
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< \
-		`pkg-config --cflags --libs glib-2.0` \
+		`pkg-config --cflags --libs glib-2.0 gio-2.0` \
 		-DDEBUG=1
 
 clean:
