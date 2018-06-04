@@ -159,23 +159,12 @@ static gpointer pingt(gpointer p)
 	g_main_loop_run(g_main_loop_new(ctx, true));
 	return NULL;
 }
-static gboolean quitif(gpointer p)
-{
-DD(quitif)
-	static int cnt = 0;
-	if (cnt++ > 30 /*3 sec*/ || !g_hash_table_size(orders)) quit(NULL);
-	return true;
-}
-static void monitorcb(GFileMonitor *m, GFile *f, GFile *o, GFileMonitorEvent e,
-		gpointer p)
-{
-	if (e != G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT) return;
-	g_timeout_add(100, quitif, NULL);
-}
 void wyebwatch(char *exe, char *caller, wyebdataf func)
 {
 	svrexe = exe;
 	dataf = func;
+	orders = g_hash_table_new(g_str_hash, g_str_equal);
+
 	until(DUNTIL);
 
 	g_thread_new("ping", pingt, NULL);
@@ -185,6 +174,18 @@ void wyebwatch(char *exe, char *caller, wyebdataf func)
 		fatal(1);
 }
 
+static gboolean quitif(gpointer p)
+{
+	static int cnt = 0;
+	if (cnt++ > 30 /* 3 secs */ || !g_hash_table_size(orders)) quit(NULL);
+	return true;
+}
+static void monitorcb(GFileMonitor *m, GFile *f, GFile *o, GFileMonitorEvent e,
+		gpointer p)
+{
+	if (e == G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT)
+		g_timeout_add(100, quitif, NULL);
+}
 static gboolean svrinit(char *caller)
 {
 	wyebwatch(svrexe, caller, dataf);
@@ -501,9 +502,6 @@ void wyebclient(char *exe)
 //@ipccb
 gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 {
-	if (!orders)
-		orders = g_hash_table_new(g_str_hash, g_str_equal);
-
 	char *line;
 	g_io_channel_read_line(ch, &line, NULL, NULL, NULL);
 	if (!line) return true;
@@ -529,6 +527,7 @@ gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 		until(lastuntil = atoi(arg));
 		break;
 	case CSdata:
+
 		g_hash_table_add(orders, id);
 		getdata(id, arg);
 		g_hash_table_remove(orders, id);
