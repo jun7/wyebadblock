@@ -164,8 +164,11 @@ static void init()
 	g_free(path);
 }
 
+static GMutex datam;
 static char *datafunc(char *req)
 {
+	g_mutex_lock(&datam);
+
 	if (initt)
 	{
 		g_thread_join(initt);
@@ -187,6 +190,7 @@ static char *datafunc(char *req)
 		D(BLOCKED %s, req)
 #endif
 
+	g_mutex_unlock(&datam);
 	return ret;
 }
 
