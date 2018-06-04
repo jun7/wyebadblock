@@ -125,7 +125,7 @@ Use the shell interface below.
 
 	wyebab
 
-Reads stdin outputs to stdout.
+Reads stdin outputs to stdout and keeps server.
 blank + enter quits.
 
 	wyebab requst_uri + ' ' + page_uri

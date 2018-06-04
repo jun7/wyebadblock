@@ -527,7 +527,6 @@ gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 		until(lastuntil = atoi(arg));
 		break;
 	case CSdata:
-
 		g_hash_table_add(orders, id);
 		getdata(id, arg);
 		g_hash_table_remove(orders, id);
