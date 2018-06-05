@@ -37,7 +37,7 @@ static bool first = true;
 static bool check(const char *requri, const char *pageuri)
 {
 	char *uris = g_strconcat(requri, " ", pageuri, NULL);
-	char *ruri = wyebreq(EXE, uris);
+	char *ruri = wyebget(EXE, uris);
 	g_free(uris);
 
 	if (ruri && !*ruri) return false;
@@ -62,10 +62,10 @@ static gboolean reqcb(WebKitWebPage *kp, WebKitURIRequest *req,
 	return true;
 }
 
-static gboolean untilcb(WebKitWebPage *kp)
+static gboolean keepcb(WebKitWebPage *kp)
 {
 	if (g_object_get_data(G_OBJECT(kp), "adblock") != (gpointer)'n')
-		wyebuntil(EXE, 30);
+		wyebkeep(EXE, 30);
 	return true;
 }
 
@@ -79,9 +79,9 @@ static void pageinit(WebKitWebExtension *ex, WebKitWebPage *kp)
 
 	g_object_set_data(G_OBJECT(kp), "wyebcheck", check);
 
-	untilcb(kp);
+	keepcb(kp);
 	g_object_weak_ref(G_OBJECT(kp), (GWeakNotify)g_source_remove,
-			GUINT_TO_POINTER(g_timeout_add(11 * 1000, (GSourceFunc)untilcb, kp)));
+			GUINT_TO_POINTER(g_timeout_add(11 * 1000, (GSourceFunc)keepcb, kp)));
 }
 
 G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
@@ -164,9 +164,9 @@ static void init()
 	g_free(path);
 }
 
-static GMutex datam;
 static char *datafunc(char *req)
 {
+	static GMutex datam;
 	g_mutex_lock(&datam);
 
 	if (initt)
@@ -219,8 +219,8 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		wyebuntil(argv[0], 30);
-		g_print("%s", wyebreq(argv[0], argv[1]));
+		wyebkeep(argv[0], 30);
+		g_print("%s", wyebget(argv[0], argv[1]));
 	}
 
 	exit(0);

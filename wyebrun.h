@@ -24,21 +24,21 @@ along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib/gstdio.h>
 
 #define WYEBPREFIX "-wyeb"
-#define WYEBDUNTIL 3
+#define WYEBKEEPSEC 3
 
 //client
 //wyebrun spawns the exe if wyebsend failes
-char *wyebreq(   char *exe, char *req); //don't free the ret val
-void  wyebsend(  char *exe, char *req);
-void  wyebuntil( char *exe, int   sec); //keep alive. default is 3s
+char *wyebget( char *exe, char *data); //don't free the ret val
+void  wyebsend(char *exe, char *data);
+void  wyebkeep(char *exe, int   sec); //keep alive. default is 3s
 //loop the wyebuntil. to stop, use g_source_remove
-guint wyebloop(  char *exe, int   sec, int loopsec);
+guint wyebloop(char *exe, int   sec);
 //send stdin to svr and ret data to stdout
 //blank and enter exit it
 void  wyebclient(char *exe);
 
 //server
-typedef char *(*wyebdataf)(char *req);
+typedef char *(*wyebdataf)(char *data);
 //server is spawned with an arg the caller
 bool wyebsvr(int argc, char **argv, wyebdataf func);
 //or if there is own GMainLoop
