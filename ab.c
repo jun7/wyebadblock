@@ -33,7 +33,6 @@ along with wyebadblock.  If not, see <http://www.gnu.org/licenses/>.
 #define EXE "wyebab"
 
 #include <webkit2/webkit-web-extension.h>
-static bool first = true;
 static bool check(const char *requri, const char *pageuri)
 {
 	char *uris = g_strconcat(requri, " ", pageuri, NULL);
@@ -49,6 +48,7 @@ static gboolean reqcb(WebKitWebPage *kp, WebKitURIRequest *req,
 	if (g_object_get_data(G_OBJECT(kp), "adblock") == (gpointer)'n')
 		return false;
 
+	static bool first = true;
 	if (first)
 	{
 		if (webkit_uri_request_get_http_headers(req))
