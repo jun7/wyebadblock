@@ -3,8 +3,8 @@ An adblock extension for [wyeb](https://github.com/jun7/wyeb), also webkit2gtk b
 
 most of code of this are from https://github.com/GNOME/epiphany/tree/master/embed/web-extension
 
-wyebad is shared by clients, So even nowadays, browsers spawn procs for each windows,
-wyebad keeps single server proc that makes less memory and less cpu times.
+wyebab is shared by clients, So even nowadays, browsers spawn procs for each windows,
+wyebab keeps single server proc that makes less memory and less cpu times.
 
 For example, while epiphay's webproc uses 240M RAM for
 [a page](http://simple-adblock.com/faq/testing-your-adblocker/), wyeb uses 160M for the same page.
