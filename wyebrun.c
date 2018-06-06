@@ -266,6 +266,7 @@ typedef struct {
 } Client;
 
 static GSList *rmpath = NULL;
+static GMutex rmm;
 static void __attribute__((destructor)) removepp()
 {
 	for (; rmpath; rmpath = rmpath->next)
@@ -282,7 +283,9 @@ static Client *makecli()
 	cli->loop   = g_main_loop_new(cli->wctx, true);
 	cli->watch  = ipcwatch(CLIDIR, cli->pid, cli->wctx, cli);
 	cli->pppath = ipcpath( CLIDIR, cli->pid);
+	g_mutex_lock(&rmm);
 	rmpath = g_slist_prepend(rmpath, cli->pppath);
+	g_mutex_unlock(&rmm);
 
 	g_thread_unref(g_thread_new("wait", (GThreadFunc)g_main_loop_run, cli->loop));
 
@@ -298,7 +301,9 @@ static void freecli(Client *cli)
 	g_free(cli->pid);
 	g_free(cli->retdata);
 	remove(cli->pppath);
+	g_mutex_lock(&rmm);
 	rmpath = g_slist_remove(rmpath, cli->pppath);
+	g_mutex_unlock(&rmm);
 	g_free(cli->pppath);
 }
 static Client *getcli()
@@ -466,7 +471,7 @@ guint wyebloop(char *exe, int sec)
 #if DEBUG
 static void testget(gpointer p, gpointer ap)
 {
-	D(send %s ret %s, (char *)p, wyebget(ap, p))
+	D(ret %s - %s, wyebget(ap, p), (char *)p)
 	g_free(p);
 }
 #endif
@@ -486,10 +491,10 @@ static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
 #if DEBUG
 	if (g_str_has_prefix(line, "l"))
 	{
-		GThreadPool *pool = g_thread_pool_new(testget, exe, 4, false, NULL);
+		GThreadPool *pool = g_thread_pool_new(testget, exe, 44, false, NULL);
 
 		start = g_get_monotonic_time();
-		for (int i = 0; i < 10000; i++)
+		for (int i = 0; i < 100000; i++)
 		{
 			char *is = g_strdup_printf("l%d", i);
 			//g_print("loop %d ret %s\n", i, wyebget(exe, is));
