@@ -121,7 +121,7 @@ G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 static EphyUriTester *tester = NULL;
 static GThread *initt = NULL;
 
-static gpointer inittcb(gpointer data)
+static gpointer inittcb(gpointer p)
 {
 	ephy_uri_tester_load(tester);
 	return NULL;
@@ -134,11 +134,9 @@ static void monitorcb(
 			e == G_FILE_MONITOR_EVENT_DELETED)
 		exit(0);
 }
-static void init()
+static bool tryload(const char *parent)
 {
-	DD(wyebad init)
-	char *path = g_build_filename(
-			g_get_user_config_dir(), DIRNAME, "easylist.txt", NULL);
+	char *path = g_build_filename(parent, DIRNAME, LISTNAME, NULL);
 
 	GFile *gf = g_file_new_for_path(path);
 	GFileMonitor *gm = g_file_monitor_file(gf,
@@ -150,16 +148,23 @@ static void init()
 	{
 		filter_file = g_file_new_for_path(path);
 		tester = ephy_uri_tester_new("/foo/bar");
-
 		initt = g_thread_new("init", inittcb, NULL);
-	} else {
-		char *dir = g_path_get_dirname(path);
-		if (!g_file_test(dir, G_FILE_TEST_EXISTS))
-			g_mkdir_with_parents(dir, 0700);
-		g_free(dir);
 	}
-
 	g_free(path);
+	return tester;
+}
+static void init()
+{
+	DD(wyebad init)
+	if (tryload(g_get_user_config_dir())) return;
+
+	for (const gchar * const *d = g_get_system_data_dirs(); *d; d++)
+		if (tryload(*d)) return;
+
+	char *dir = g_build_filename(g_get_user_config_dir(), DIRNAME, NULL);
+	if (!g_file_test(dir, G_FILE_TEST_EXISTS))
+		g_mkdir_with_parents(dir, 0700);
+	g_free(dir);
 }
 
 static char *datafunc(char *req)

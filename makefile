@@ -1,3 +1,4 @@
+LISTNAME=easylist.txt
 EXTENSION_DIR=$(DESTDIR)/usr/lib/wyebrowser
 ifeq ($(DEBUG), 1)
 	CFLAGS += -Wall
@@ -17,7 +18,7 @@ adblock.so: ab.c ephy-uri-tester.c ephy-uri-tester.h librun.o makefile
 wyebab: ab.c ephy-uri-tester.c ephy-uri-tester.h librun.o makefile
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< librun.o \
 		`pkg-config --cflags --libs glib-2.0 gio-2.0` \
-		$(DDEBUG) -DDIRNAME=\"wyebadblock\"
+		$(DDEBUG) -DDIRNAME=\"wyebadblock\" -DLISTNAME=\"$(LISTNAME)\"
 
 librun.o: wyebrun.c wyebrun.h makefile
 	$(CC) $(CFLAGS) $(LDFLAGS) -c -o $@ $< -fPIC\
