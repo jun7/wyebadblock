@@ -258,26 +258,47 @@ typedef struct {
 	GMutex retm;
 	GMainContext *wctx;
 	GMainLoop *loop;
+	GSource *watch;
 	char *pid;
 	char *retdata;
 	char *pppath;
 	char *exe; //do not free. this is tmp
 } Client;
+
+static GSList *rmpath = NULL;
+static void __attribute__((destructor)) removepp()
+{
+	for (; rmpath; rmpath = rmpath->next)
+		remove(rmpath->data);
+}
 static Client *makecli()
 {
 	Client *cli = g_new0(Client, 1);
 	g_mutex_init(&cli->retm);
 	cli->pid = g_strdup_printf(PREFIX"%d-%d",
 			getpid(), GPOINTER_TO_INT(g_thread_self()));
+
+	cli->wctx   = g_main_context_new();
+	cli->loop   = g_main_loop_new(cli->wctx, true);
+	cli->watch  = ipcwatch(CLIDIR, cli->pid, cli->wctx, cli);
+	cli->pppath = ipcpath( CLIDIR, cli->pid);
+	rmpath = g_slist_prepend(rmpath, cli->pppath);
+
+	g_thread_unref(g_thread_new("wait", (GThreadFunc)g_main_loop_run, cli->loop));
+
 	return cli;
 }
 static void freecli(Client *cli)
 {
-	g_mutex_clear(&cli->retm);
 	g_main_loop_quit(cli->loop);
+	g_source_unref(cli->watch);
+	g_main_loop_unref(cli->loop);
+	g_main_context_unref(cli->wctx);
+	g_mutex_clear(&cli->retm);
 	g_free(cli->pid);
 	g_free(cli->retdata);
 	remove(cli->pppath);
+	rmpath = g_slist_remove(rmpath, cli->pppath);
 	g_free(cli->pppath);
 }
 static Client *getcli()
@@ -322,41 +343,6 @@ static gboolean pingloop(Client *cli)
 
 	return true;
 }
-static void removepp()
-{
-	remove(getcli()->pppath);
-}
-static gpointer waitt(Client *cli)
-{
-	if (cli->wctx) return NULL;
-
-	cli->wctx = g_main_context_new();
-	cli->loop = g_main_loop_new(cli->wctx, true);
-	GSource *watch = ipcwatch(CLIDIR, cli->pid, cli->wctx, cli);
-
-	cli->pppath = ipcpath(CLIDIR, cli->pid);
-	static bool reged = false;
-	if (!reged) atexit(removepp);
-	reged = true;
-
-	g_mutex_unlock(&cli->retm);
-	g_main_loop_run(cli->loop);
-
-	g_source_unref(watch);
-	g_main_loop_unref(cli->loop);
-	g_main_context_unref(cli->wctx);
-
-	return NULL;
-}
-static void makewaitt(Client *cli)
-{
-	g_mutex_lock(&cli->retm);
-
-	g_thread_unref(g_thread_new("wait", (GThreadFunc)waitt, cli));
-
-	g_mutex_lock(&cli->retm);
-	g_mutex_unlock(&cli->retm);
-}
 static gboolean timeoutcb(Client *cli)
 {
 	g_mutex_unlock(&cli->retm);
@@ -367,8 +353,6 @@ static gboolean timeoutcb(Client *cli)
 static char *request(char *exe, Com type, bool caller, char *data)
 {
 	Client *cli = getcli();
-
-	if (!cli->wctx) makewaitt(cli);
 
 	if (caller)
 	{
@@ -505,7 +489,7 @@ static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
 		GThreadPool *pool = g_thread_pool_new(testget, exe, 4, false, NULL);
 
 		start = g_get_monotonic_time();
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < 10000; i++)
 		{
 			char *is = g_strdup_printf("l%d", i);
 			//g_print("loop %d ret %s\n", i, wyebget(exe, is));
@@ -560,15 +544,12 @@ gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 	char *line;
 	g_io_channel_read_line(ch, &line, NULL, NULL, NULL);
 	if (!line) return true;
-	g_strchomp(line);
 
-	char *unesc = g_strcompress(line);
-	g_free(line);
-
-	Com type  = *unesc;
-	char *id  = unesc + 1;
-	char *data = strchr(unesc, ':');
+	Com type  = *line;
+	char *id  = line + 1;
+	char *data = strchr(line, ':');
 	*data++ = '\0';
+	g_strchomp(data);
 
 #if DEBUG
 //	static int i = 0;
@@ -581,7 +562,7 @@ gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 	{
 		Dataargs *args = g_new(Dataargs, 1);
 		args->caller = g_strdup(id);
-		args->data = g_strdup(data);
+		args->data = g_strcompress(data);
 
 		static GThreadPool *pool = NULL;
 		if (!pool) pool = g_thread_pool_new(getdata, NULL, -1, false, NULL);
@@ -604,7 +585,7 @@ gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 	{
 		Client *cli = p;
 		if (type == CCret)
-			cli->retdata = g_strdup(data);
+			cli->retdata = g_strcompress(data);
 
 		//for the case pinging at same time of ret
 		g_mutex_trylock(&cli->retm);
@@ -613,7 +594,7 @@ gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 	}
 	}
 
-	g_free(unesc);
+	g_free(line);
 	return true;
 }
 
