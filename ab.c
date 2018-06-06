@@ -30,13 +30,11 @@ along with wyebadblock.  If not, see <http://www.gnu.org/licenses/>.
 
 #if ISEXT
 
-#define EXE "wyebab"
-
 #include <webkit2/webkit-web-extension.h>
 static bool check(const char *requri, const char *pageuri)
 {
 	char *uris = g_strconcat(requri, " ", pageuri, NULL);
-	char *ruri = wyebget(EXE, uris);
+	char *ruri = wyebget(EXENAME, uris);
 	g_free(uris);
 
 	if (ruri && !*ruri) return false;
@@ -65,7 +63,7 @@ static gboolean reqcb(WebKitWebPage *kp, WebKitURIRequest *req,
 static gboolean keepcb(WebKitWebPage *kp)
 {
 	if (g_object_get_data(G_OBJECT(kp), "adblock") != (gpointer)'n')
-		wyebkeep(EXE, 30);
+		wyebkeep(EXENAME, 30);
 	return true;
 }
 
@@ -140,7 +138,7 @@ static void init()
 {
 	DD(wyebad init)
 	char *path = g_build_filename(
-			g_get_user_config_dir(), APPNAME, "easylist.txt", NULL);
+			g_get_user_config_dir(), DIRNAME, "easylist.txt", NULL);
 
 	GFile *gf = g_file_new_for_path(path);
 	GFileMonitor *gm = g_file_monitor_file(gf,
