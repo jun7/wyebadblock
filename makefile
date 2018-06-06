@@ -14,7 +14,7 @@ adblock.so: ab.c ephy-uri-tester.c ephy-uri-tester.h librun.o makefile
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< librun.o -shared -fPIC \
 		`pkg-config --cflags --libs gtk+-3.0 glib-2.0 webkit2gtk-4.0` \
 		-DEXTENSION_DIR=\"$(EXTENSION_DIR)\" \
-		$(DDEBUG) $(DAPPNAME) -DISEXT
+		$(DDEBUG) -DISEXT
 
 wyebab: ab.c ephy-uri-tester.c ephy-uri-tester.h librun.o makefile
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< librun.o \
