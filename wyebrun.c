@@ -412,7 +412,7 @@ static char *request(char *exe, Com type, bool caller, char *data)
 			if (caller)
 				g_mutex_lock(&cli->retm);
 			if (!ipcsend(exe, INPUT, type, caller ? cli->pid : NULL, data))
-				fatal(3); //spawning svr failse is fatal
+				P(Spawning %s failed !!, exe)
 		}
 		close(lock);
 	}

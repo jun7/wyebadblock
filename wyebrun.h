@@ -27,11 +27,11 @@ along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 #define WYEBKEEPSEC 3
 
 //client
-//wyebrun spawns the exe if wyebsend failes
+//wyebrun spawns the exe automatically
 char *wyebget( char *exe, char *data); //don't free the ret val
 void  wyebsend(char *exe, char *data);
 void  wyebkeep(char *exe, int   sec); //keep alive. default is 3s
-//loop the wyebuntil. to stop, use g_source_remove
+//loop the wyebkeep. to stop, use g_source_remove
 guint wyebloop(char *exe, int   sec);
 //send stdin to svr and ret data to stdout
 //blank and enter exit it
