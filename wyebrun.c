@@ -494,7 +494,7 @@ static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
 		GThreadPool *pool = g_thread_pool_new(testget, exe, 44, false, NULL);
 
 		start = g_get_monotonic_time();
-		for (int i = 0; i < 100000; i++)
+		for (int i = 0; i < 10000; i++)
 		{
 			char *is = g_strdup_printf("l%d", i);
 			//g_print("loop %d ret %s\n", i, wyebget(exe, is));
@@ -502,9 +502,18 @@ static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
 				wyebsend(exe, is);
 			else if (*(line + 1) == 'p')
 				D(pint %s, is)
+			else if (*(line + 1) == 'c')
+			{
+				gchar *data;
+				g_spawn_command_line_sync("echo 'ret'", &data, NULL, NULL, NULL);
+				g_strchomp(data);
+				D(cmd %s %s, is, data)
+				g_free(data);
+			}
 			else
 				g_thread_pool_push(pool, g_strdup(is), NULL);
 //				wyebget(exe, is);
+
 			g_free(is);
 		}
 		g_thread_pool_free(pool, false, true);
@@ -513,10 +522,8 @@ static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
 		D(time %f, (now - start) / 1000000.0)
 	}
 	else
-		g_print("RET is %s\n", wyebget(exe, line));
-#else
-	g_print("%s\n", wyebget(exe, line)); //don't free
 #endif
+	P(%s, wyebget(exe, line))
 
 	g_free(line);
 	return true;
