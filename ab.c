@@ -211,7 +211,7 @@ int main(int argc, char **argv)
 		init();
 		wyebsvr(argc, argv, datafunc);
 	}
-	else if (!strcmp(argv[1], "-css"))
+	else if (!strcmp(argv[1], "-css") || !strcmp(argv[1], "--css"))
 	{
 		init();
 		g_thread_join(initt);

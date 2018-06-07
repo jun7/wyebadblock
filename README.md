@@ -79,7 +79,7 @@ and make link from the dir to the wyebadblock as above.
 ## Element Hiding
 Per domain CSS hider rule is not supported
 
-	wyebab -css > user.css
+	wyebab --css > user.css
 
 And add the user.css to your browser as user css.
 For wyeb, just copy the user.css to the conf dir.
