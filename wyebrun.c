@@ -17,9 +17,9 @@ You should have received a copy of the GNU General Public License
 along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-//gettid
-#include <sys/syscall.h>
+//getpid
+#include <sys/types.h>
+#include <unistd.h>
 
 //flock
 #include <sys/file.h>
@@ -275,7 +275,8 @@ static Client *makecli()
 {
 	Client *cli = g_new0(Client, 1);
 	g_mutex_init(&cli->retm);
-	cli->pid = g_strdup_printf("%d", (pid_t)syscall(SYS_gettid));
+	static int tid = 0;
+	cli->pid = g_strdup_printf("%d-%u", tid++, getpid());
 
 	cli->wctx   = g_main_context_new();
 	cli->loop   = g_main_loop_new(cli->wctx, true);
