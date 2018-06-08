@@ -199,7 +199,7 @@ static gboolean svrinit(char *caller)
 	wyebwatch(svrexe, caller, dataf);
 
 	char path[PATH_MAX];
-	readlink("/proc/self/exe", path, PATH_MAX);
+	(void)readlink("/proc/self/exe", path, PATH_MAX);
 	D(exepath %s, path)
 	GFile *gf = g_file_new_for_path(path);
 	GFileMonitor *gm = g_file_monitor_file(
@@ -232,17 +232,23 @@ static void getdata(gpointer p, gpointer ap)
 {
 	Dataargs *args = p;
 
-	g_mutex_lock(&ordersm);
-	g_hash_table_add(orders, args->caller);
-	g_mutex_unlock(&ordersm);
+	if (*args->caller)
+	{
+		g_mutex_lock(&ordersm);
+		g_hash_table_add(orders, args->caller);
+		g_mutex_unlock(&ordersm);
+	}
 
 	char *data = dataf(args->data);
 	if (*args->caller && !ipcsend(CLIDIR, args->caller, CCret, "", data)) fatal(2);
 	g_free(data);
 
-	g_mutex_lock(&ordersm);
-	g_hash_table_remove(orders, args->caller);
-	g_mutex_unlock(&ordersm);
+	if (*args->caller)
+	{
+		g_mutex_lock(&ordersm);
+		g_hash_table_remove(orders, args->caller);
+		g_mutex_unlock(&ordersm);
+	}
 
 	g_free(args->caller);
 	g_free(args->data);
@@ -494,7 +500,7 @@ static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
 		GThreadPool *pool = g_thread_pool_new(testget, exe, 44, false, NULL);
 
 		start = g_get_monotonic_time();
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < 10000; i++)
 		{
 			char *is = g_strdup_printf("l%d", i);
 			//g_print("loop %d ret %s\n", i, wyebget(exe, is));
