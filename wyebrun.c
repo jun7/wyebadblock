@@ -18,9 +18,8 @@ along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-//getpid
-#include <sys/types.h>
-#include <unistd.h>
+//gettid
+#include <sys/syscall.h>
 
 //flock
 #include <sys/file.h>
@@ -213,12 +212,12 @@ static gboolean svrinit(char *caller)
 
 bool wyebsvr(int argc, char **argv, wyebdataf func)
 {
-	if (argc < 2 || !g_str_has_prefix(argv[1], PREFIX)) return false;
+	if (argc < 3 || strcmp(argv[1], PREFIX)) return false;
 
 	svrexe = argv[0];
 	dataf = func;
 	sloop = g_main_loop_new(NULL, false);
-	g_idle_add((GSourceFunc)svrinit, argv[1]);
+	g_idle_add((GSourceFunc)svrinit, argv[2]);
 	g_main_loop_run(sloop);
 
 	return true;
@@ -276,8 +275,7 @@ static Client *makecli()
 {
 	Client *cli = g_new0(Client, 1);
 	g_mutex_init(&cli->retm);
-	cli->pid = g_strdup_printf(PREFIX"%d-%d",
-			getpid(), GPOINTER_TO_INT(g_thread_self()));
+	cli->pid = g_strdup_printf("%d", (pid_t)syscall(SYS_gettid));
 
 	cli->wctx   = g_main_context_new();
 	cli->loop   = g_main_loop_new(cli->wctx, true);
@@ -387,9 +385,10 @@ static char *request(char *exe, Com type, bool caller, char *data)
 			g_source_attach(tout, cli->wctx);
 
 
-			char **argv = g_new0(char*, 3);
+			char **argv = g_new0(char*, 4);
 			argv[0] = exe;
-			argv[1] = cli->pid;
+			argv[1] = PREFIX;
+			argv[2] = cli->pid;
 			GError *err = NULL;
 			if (!g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
 						NULL, NULL, NULL, &err))
@@ -494,7 +493,7 @@ static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
 		GThreadPool *pool = g_thread_pool_new(testget, exe, 44, false, NULL);
 
 		start = g_get_monotonic_time();
-		for (int i = 0; i < 10000; i++)
+		for (int i = 0; i < 100; i++)
 		{
 			char *is = g_strdup_printf("l%d", i);
 			//g_print("loop %d ret %s\n", i, wyebget(exe, is));

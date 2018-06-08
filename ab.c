@@ -206,7 +206,7 @@ int main(int argc, char **argv)
 	{
 		wyebclient(argv[0]);
 	}
-	else if (g_str_has_prefix(argv[1], WYEBPREFIX))
+	else if (!strcmp(argv[1], WYEBPREFIX))
 	{
 		init();
 		wyebsvr(argc, argv, datafunc);

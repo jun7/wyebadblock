@@ -23,7 +23,7 @@ along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdbool.h>
 #include <glib/gstdio.h>
 
-#define WYEBPREFIX "-wyeb"
+#define WYEBPREFIX "--wyebrun"
 #define WYEBKEEPSEC 3
 
 //client
@@ -43,7 +43,8 @@ typedef char *(*wyebdataf)(char *data);
 bool wyebsvr(int argc, char **argv, wyebdataf func);
 //or if there is own GMainLoop
 void wyebwatch(char *exe, char *caller, wyebdataf func);
-//the caller is used to send the res meaning we are ready.
+//the caller is sent as 'exe --wyebrun 9999' and
+//used to send the res meaning we are ready.
 //3 sec left or client will die
 
 
