@@ -4,7 +4,7 @@ An adblock extension for [wyeb](https://github.com/jun7/wyeb), also webkit2gtk b
 most of code of this are from https://github.com/GNOME/epiphany/tree/master/embed/web-extension
 
 wyebab is shared by clients, So even nowadays, browsers spawn procs for each windows,
-wyebab keeps single server proc that makes less memory and less cpu times.
+wyebab keeps single server proc that makes less RAM and less CPU times.
 
 For example, while epiphay's webproc uses 240M RAM for
 [a page](http://simple-adblock.com/faq/testing-your-adblocker/), wyeb uses 160M for the same page.
@@ -18,7 +18,7 @@ Don't worry, wyebab wills quit automatically when there is no client and 30 secs
 	sudo make install
 
 then
-copy **easylist.txt** to ~/.config/wyebadblock/
+copy the **easylist.txt** to ~/.config/wyebadblock/
 
 wyebadblock only checks 'easylist.txt'
 
@@ -84,7 +84,8 @@ Per domain CSS hider rule is not supported
 And add the user.css to your browser as user css.
 For wyeb, just copy the user.css to the conf dir.
 
-Make sure the huge css takes mamory a lot.
+Make sure the huge css takes RAM a lot.
+Also it is often used to detect adblock.
 
 
 ## Disabling

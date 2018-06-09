@@ -219,7 +219,7 @@ int main(int argc, char **argv)
 		g_print("%s", tester->blockcss->str);
 		g_print("\n\n\n\n{display:none !important}\n"
 				"\n/*\n"
-				"{height:0 !important; visibility:hidden !important;}\n"
+				"{opacity:0 !important; position:absolute !important;}\n"
 				"\n*/\n");
 		//g_print(tester->blockcssprivate->str);
 	}
