@@ -182,28 +182,44 @@ ephy_uri_tester_is_matched (EphyUriTester *tester,
                             const char    *page_uri,
                             gboolean       whitelist)
 {
+/*
   char *value;
+*/
   GHashTable *urlcache = tester->urlcache;
   if (whitelist)
     urlcache = tester->whitelisted_urlcache;
 
   /* Check cached URLs first. */
+/*
   if ((value = g_hash_table_lookup (urlcache, req_uri)))
     return GPOINTER_TO_INT (value);
+*/
+	char f;
+	if ((f = GPOINTER_TO_INT(g_hash_table_lookup(urlcache, req_uri))))
+		return f == 'T';
 
   /* Look for a match either by key or by pattern. */
   if (ephy_uri_tester_is_matched_by_key (tester, opts, req_uri, page_uri, whitelist)) {
+/*
     g_hash_table_insert (urlcache, g_strdup (req_uri), g_strdup ("1"));
+*/
+		g_hash_table_insert(urlcache, g_strdup(req_uri), GINT_TO_POINTER('T'));
     return TRUE;
   }
 
   /* Matching by pattern is pretty expensive, so do it if needed only. */
   if (ephy_uri_tester_is_matched_by_pattern (tester, req_uri, page_uri, whitelist)) {
+/*
     g_hash_table_insert (urlcache, g_strdup (req_uri), GINT_TO_POINTER (TRUE));
+*/
+		g_hash_table_insert(urlcache, g_strdup(req_uri), GINT_TO_POINTER('T'));
     return TRUE;
   }
 
+/*
   g_hash_table_insert (urlcache, g_strdup (req_uri), GINT_TO_POINTER (FALSE));
+*/
+		g_hash_table_insert(urlcache, g_strdup(req_uri), GINT_TO_POINTER('F'));
   return FALSE;
 }
 
