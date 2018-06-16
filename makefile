@@ -23,12 +23,12 @@ wyebab: ab.c ephy-uri-tester.c ephy-uri-tester.h librun.o makefile
 librun.o: wyebrun.c wyebrun.h makefile
 	$(CC) $(CFLAGS) $(LDFLAGS) -c -o $@ $< -fPIC\
 		`pkg-config --cflags --libs glib-2.0` \
-		-DDEBUG=0
+		$(DDEBUG)
 
 testrun: wyebrun.c wyebrun.h makefile
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< \
 		`pkg-config --cflags --libs glib-2.0 gio-2.0` \
-		-DDEBUG=1
+		-DDEBUG=1 -DTESTER=1
 
 clean:
 	rm -f adblock.so

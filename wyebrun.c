@@ -27,6 +27,7 @@ along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 //monitor
 #include <gio/gio.h>
 
+
 #include "wyebrun.h"
 
 #define ROOTNAME "wyebrun"
@@ -98,23 +99,33 @@ static bool ipcsend(char *exe, char *name,
 	static GMutex m;
 	g_mutex_lock(&m);
 
-	//D(ipcsend exe:%s name:%s, exe, name)
 	char *path = preparepp(exe, name);
 
 	char *esc  = g_strescape(data ?: "", "");
+	D(ipcsend exe:%s name:%s type:%c sizs:%lu, exe, name, type, strlen(esc ?: ""))
 	char *line = g_strdup_printf("%c%s:%s\n", type, caller ?: "", esc);
+	int len = strlen(line);
 	g_free(esc);
 
+
+	bool ret = false;
 	int pp = open(path, O_WRONLY | O_NONBLOCK);
-
-	bool ret = write(pp, line, strlen(line)) != -1;
+	if (pp > -1)
+	{
+		if (len > PIPE_BUF) //4096 => len is atomic
+		{
+			flock(pp, LOCK_EX);
+			fcntl(pp, F_SETFL, 0); //clear O_NONBLOCK to write len > 65536;
+		}
+		ret = write(pp, line, len) == len;
+		close(pp);
+	}
 	g_free(line);
-
-	close(pp);
-
 	g_free(path);
 
 	g_mutex_unlock(&m);
+
+	D(ipcsend ret %d, ret)
 	return ret;
 }
 
@@ -559,6 +570,7 @@ void wyebclient(char *exe)
 //@ipccb
 gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 {
+	//D(ipccb %c, svrexe ? 'S':'C')
 	char *line;
 	g_io_channel_read_line(ch, &line, NULL, NULL, NULL);
 	if (!line) return true;
@@ -570,8 +582,8 @@ gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 	g_strchomp(data);
 
 #if DEBUG
-//	static int i = 0;
-//	D(%c ipccb%d %c/%s/%s;, svrexe ? 'S':'C', i++, type ,id ,data)
+	static int i = 0;
+	D(%c ipccb%d %c/%s/%lu;, svrexe ? 'S':'C', i++, type ,id, strlen(data))
 #endif
 
 	switch (type) {
@@ -619,7 +631,7 @@ gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 
 
 //test
-#if DEBUG
+#if TESTER
 static char *testdata(char *data)
 {
 	//sleep(9);
@@ -629,10 +641,11 @@ static char *testdata(char *data)
 	return g_strdup_printf("%d th test data. req is %s", ++i, data);
 }
 
-
 int main(int argc, char **argv)
 {
+#if DEBUG
 	start = g_get_monotonic_time();
+#endif
 //	gint64 now = g_get_monotonic_time();
 //	D(time %ld %ld, now - start, now)
 
