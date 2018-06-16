@@ -117,6 +117,9 @@ static bool ipcsend(char *exe, char *name,
 			flock(pp, LOCK_EX);
 			fcntl(pp, F_SETFL, 0); //clear O_NONBLOCK to write len > 65536;
 		}
+		else
+			flock(pp, LOCK_SH);
+
 		ret = write(pp, line, len) == len;
 		close(pp);
 	}
