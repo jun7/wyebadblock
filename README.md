@@ -129,7 +129,7 @@ Use the shell interface below.
 Reads stdin outputs to stdout and keeps server.
 blank + enter quits.
 
-	wyebab requst_uri + ' ' + page_uri
+	wyebab "requst_uri page_uri"
 
 Outputs result and
 Keeps server 30 secs.
