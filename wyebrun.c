@@ -79,23 +79,12 @@ static void mkdirif(char *path)
 static char *ipcpath(char *exe, char *name)
 {
 	return g_build_filename(g_get_user_runtime_dir(),
-			ROOTNAME,exe, name, NULL);
+			ROOTNAME, exe, name, NULL);
 }
-static char *preparepp(char *exe, char *name)
-{
-	char *path = ipcpath(exe, name);
-	if (!g_file_test(path, G_FILE_TEST_EXISTS))
-	{
-		mkdirif(path);
-		mkfifo(path, 0600);
-	}
-	return path;
-}
-
 static bool ipcsend(char *exe, char *name,
 		Com type, char *caller, char *data)
 {
-	char *path = preparepp(exe, name);
+	char *path = ipcpath(exe, name);
 
 	char *esc  = g_strescape(data ?: "", "");
 	D(ipcsend exe:%s name:%s type:%c sizs:%lu, exe, name, type, strlen(esc ?: ""))
@@ -131,7 +120,12 @@ static gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p);
 
 static GSource *ipcwatch(char *exe, char *name, GMainContext *ctx, gpointer p)
 {
-	char *path = preparepp(exe, name);
+	char *path = ipcpath(exe, name);
+	if (!g_file_test(path, G_FILE_TEST_EXISTS))
+	{
+		mkdirif(path);
+		mkfifo(path, 0600);
+	}
 
 	GIOChannel *io = g_io_channel_new_file(path, "r+", NULL);
 	GSource *watch = g_io_create_watch(io, G_IO_IN);
