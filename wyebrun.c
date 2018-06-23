@@ -41,7 +41,6 @@ along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 #define P(f, ...) g_print(#f"\n", __VA_ARGS__);
 
 #if DEBUG
-static gint64 start;
 # define D(f, ...) g_print("#"#f"\n", __VA_ARGS__);
 # define DD(a) g_print("#"#a"\n");
 #else
@@ -96,9 +95,6 @@ static char *preparepp(char *exe, char *name)
 static bool ipcsend(char *exe, char *name,
 		Com type, char *caller, char *data)
 {
-	static GMutex m;
-	g_mutex_lock(&m);
-
 	char *path = preparepp(exe, name);
 
 	char *esc  = g_strescape(data ?: "", "");
@@ -123,12 +119,11 @@ static bool ipcsend(char *exe, char *name,
 		ret = write(pp, line, len) == len;
 		close(pp);
 	}
+
 	g_free(line);
 	g_free(path);
 
-	g_mutex_unlock(&m);
-
-	D(ipcsend ret %d, ret)
+	//D(ipcsend ret %d, ret)
 	return ret;
 }
 
@@ -488,10 +483,11 @@ guint wyebloop(char *exe, int sec)
 }
 
 
-#if DEBUG
+#if TESTER
 static void testget(gpointer p, gpointer ap)
 {
-	D(ret %s - %s, wyebget(ap, p), (char *)p)
+	P(ret %s - %s, wyebget(ap, p), (char *)p)
+//	wyebget(ap, p);
 	g_free(p);
 }
 #endif
@@ -508,13 +504,13 @@ static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
 	if (!strlen(line))
 		exit(0);
 
-#if DEBUG
+#if TESTER
 	if (g_str_has_prefix(line, "l"))
 	{
-		GThreadPool *pool = g_thread_pool_new(testget, exe, 44, false, NULL);
+		GThreadPool *pool = g_thread_pool_new(testget, exe, 66, false, NULL);
 
-		start = g_get_monotonic_time();
-		for (int i = 0; i < 10000; i++)
+		gint64 start = g_get_monotonic_time();
+		for (int i = 0; i < 100000; i++)
 		{
 			char *is = g_strdup_printf("l%d", i);
 			//g_print("loop %d ret %s\n", i, wyebget(exe, is));
@@ -531,15 +527,18 @@ static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
 				g_free(data);
 			}
 			else
-				g_thread_pool_push(pool, g_strdup(is), NULL);
+			{
 //				wyebget(exe, is);
+				g_thread_pool_push(pool, is, NULL);
+				is = NULL;
+			}
 
 			g_free(is);
 		}
 		g_thread_pool_free(pool, false, true);
 
 		gint64 now = g_get_monotonic_time();
-		D(time %f, (now - start) / 1000000.0)
+		P(time %f, (now - start) / 1000000.0)
 	}
 	else
 #endif
@@ -646,9 +645,7 @@ static char *testdata(char *data)
 
 int main(int argc, char **argv)
 {
-#if DEBUG
-	start = g_get_monotonic_time();
-#endif
+//	start = g_get_monotonic_time();
 //	gint64 now = g_get_monotonic_time();
 //	D(time %ld %ld, now - start, now)
 
