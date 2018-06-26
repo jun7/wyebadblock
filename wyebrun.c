@@ -318,8 +318,10 @@ static Client *getcli()
 {
 	static GMutex m;
 	g_mutex_lock(&m);
+
 	static GPrivate pc = G_PRIVATE_INIT((GDestroyNotify)freecli);
 	Client *cli = g_private_get(&pc);
+
 	if (!cli)
 	{
 		cli = makecli();
@@ -480,8 +482,8 @@ guint wyebloop(char *exe, int sec)
 #if TESTER
 static void testget(gpointer p, gpointer ap)
 {
-	P(ret %s - %s, wyebget(ap, p), (char *)p)
-//	wyebget(ap, p);
+//	P(ret %s - %s, wyebget(ap, p), (char *)p)
+	wyebget(ap, p);
 	g_free(p);
 }
 #endif
@@ -501,7 +503,7 @@ static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
 #if TESTER
 	if (g_str_has_prefix(line, "l"))
 	{
-		GThreadPool *pool = g_thread_pool_new(testget, exe, 66, false, NULL);
+		GThreadPool *pool = g_thread_pool_new(testget, exe, 32, false, NULL);
 
 		gint64 start = g_get_monotonic_time();
 		for (int i = 0; i < 100000; i++)
@@ -616,6 +618,7 @@ gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 		//for the case pinging at same time of ret
 		g_mutex_trylock(&cli->retm);
 		g_mutex_unlock(&cli->retm);
+		g_thread_yield();
 		break;
 	}
 	}
