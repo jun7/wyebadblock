@@ -1,5 +1,5 @@
 # wyebadblock
-An adblock extension for [wyeb](https://github.com/jun7/wyeb), also webkit2gtk browsers.
+An adblock extension using the easylist.txt for [wyeb](https://github.com/jun7/wyeb), also webkit2gtk browsers.
 
 most of code of this are from https://github.com/GNOME/epiphany/tree/master/embed/web-extension
 

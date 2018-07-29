@@ -34,7 +34,7 @@ void  wyebkeep(char *exe, int   sec); //keep alive. default is 3s
 //loop the wyebkeep. to stop, use g_source_remove
 guint wyebloop(char *exe, int   sec);
 //send stdin to svr and ret data to stdout
-//blank and enter exit it
+//blank and enter exits
 void  wyebclient(char *exe);
 
 //server
