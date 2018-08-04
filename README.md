@@ -6,9 +6,9 @@ most of code of this are from https://github.com/GNOME/epiphany/tree/master/embe
 wyebab is shared by clients, So even nowadays, browsers spawn procs for each windows,
 wyebab keeps single server proc that makes less RAM and less CPU times.
 
-For example, while epiphay's webproc uses 240M RAM for
+For example, while an epiphay's webproc uses 240M RAM for
 [a page](http://simple-adblock.com/faq/testing-your-adblocker/), wyeb uses 160M for the same page.
-Of course the adblock uses 80M but not gain.
+Of course wyebab uses 80M but not gain.
 
 Don't worry, wyebab wills quit automatically when there is no client and 30 secs past.
 
@@ -23,10 +23,10 @@ copy the **easylist.txt** to ~/.config/wyebadblock/
 wyebadblock only checks 'easylist.txt'
 
 Testing element hiding is not supported though,
-You can check if it works on http://simple-adblock.com/faq/testing-your-adblocker/
+You can check whether it works on http://simple-adblock.com/faq/testing-your-adblocker/
 
 
-## For webkit2gtk browsers
+## Addition for other webkit2gtk browsers
 On Arch Linux. Make sure on other distros, the paths are may different.
 
 ### surfer
@@ -69,8 +69,8 @@ There is a PKGBUILD file. see the 'PKGBULDs' dir.
 webkit2gtk loads extensions in a dir designated by each apps.
 So we have to know which dir is the dir.
 
-search 'webkit_web_context_set_web_extensions_directory' in source code
-and make link from the dir to the wyebadblock as above.
+search 'webkit_web_context_set_web_extensions_directory' in its source code
+and make the link from the dir to the wyebadblock just like above browsers.
 
 
 ---
@@ -81,10 +81,10 @@ Per domain CSS hider rule is not supported
 
 	wyebab --css > user.css
 
-And add the user.css to your browser as user css.
+And add the user.css to your browser as a user css.
 For wyeb, just copy the user.css to the conf dir.
 
-Make sure the huge css takes RAM a lot.
+Make sure that huge css takes RAM a lot.
 Also it is often used to detect adblock.
 
 
@@ -101,7 +101,7 @@ webkit_web_context_set_web_extensions_initialization_user_data;
 
 	g_object_set_data(G_OBJECT(webkitwebpage), "adblock", GINT_TO_POINTER('n'));
 
-in any extension.
+in any extension in the same process.
 
 #### Full Control
 
@@ -121,6 +121,9 @@ or
 
 Use the shell interface below.
 
+or
+
+Use wyebrun like the client code of wyebab in the ISEXT part of the ab.c.
 
 ## Shell
 
