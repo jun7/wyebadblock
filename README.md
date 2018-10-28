@@ -57,7 +57,7 @@ There is a PKGBUILD file. see the 'PKGBULDs' dir.
 
 There is a PKGBUILD file. see the 'PKGBULDs' dir.
 
-If the path doesn't workm, Check https://fanglingsu.github.io/vimb/howto.html#block
+If the path doesn't work, Check https://fanglingsu.github.io/vimb/howto.html#block
 
 ### luakit
 
