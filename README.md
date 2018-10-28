@@ -28,7 +28,7 @@ You can check whether it works on http://simple-adblock.com/faq/testing-your-adb
 
 ## Addition for other webkit2gtk browsers
 webkit2gtk loads extensions in a dir designated by each apps.
-So we have to make the link of wyebab in the dir.
+So we have to make a link to wyebab in the dir.
 
 Following paths are for Arch Linux. Make sure on other distros, the paths are may different.
 
@@ -57,7 +57,7 @@ There is a PKGBUILD file. see the 'PKGBULDs' dir.
 
 There is a PKGBUILD file. see the 'PKGBULDs' dir.
 
-If the path doesn't work, Check https://fanglingsu.github.io/vimb/howto.html#block
+If the path doesn't work, check https://fanglingsu.github.io/vimb/howto.html#block
 
 ### luakit
 
