@@ -27,7 +27,10 @@ You can check whether it works on http://simple-adblock.com/faq/testing-your-adb
 
 
 ## Addition for other webkit2gtk browsers
-On Arch Linux. Make sure on other distros, the paths are may different.
+webkit2gtk loads extensions in a dir designated by each apps.
+So we have to make the link of wyebab in the dir.
+
+Following paths are for Arch Linux. Make sure on other distros, the paths are may different.
 
 ### surfer
 
@@ -54,6 +57,8 @@ There is a PKGBUILD file. see the 'PKGBULDs' dir.
 
 There is a PKGBUILD file. see the 'PKGBULDs' dir.
 
+If the path doesn't workm, Check https://fanglingsu.github.io/vimb/howto.html#block
+
 ### luakit
 
 	sudo ln -s /usr/lib/wyebrowser/adblock.so /lib/luakit
@@ -65,9 +70,6 @@ There is a PKGBUILD file. see the 'PKGBULDs' dir.
 
 
 ### Others
-
-webkit2gtk loads extensions in a dir designated by each apps.
-So we have to know which dir is the dir.
 
 search 'webkit_web_context_set_web_extensions_directory' in its source code
 and make the link from the dir to the wyebadblock just like above browsers.
