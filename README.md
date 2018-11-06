@@ -94,6 +94,10 @@ Also it is often used to detect adblock.
 
 Setting chars(whatever) to the env value $DISABLE_ADBLOCK disables adblock.
 
+or
+
+Move the easylist.txt.
+
 ### For source code:
 set string ";adblock:false;" as the user data of the
 webkit_web_context_set_web_extensions_initialization_user_data;
