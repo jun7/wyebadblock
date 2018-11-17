@@ -1,5 +1,6 @@
 LISTNAME=easylist.txt
-EXTENSION_DIR=$(DESTDIR)/usr/lib/wyebrowser
+PREFIX ?= /usr
+EXTENSION_DIR ?= $(PREFIX)/lib/wyebrowser
 ifeq ($(DEBUG), 1)
 	CFLAGS += -Wall
 else
@@ -37,11 +38,11 @@ clean:
 	rm -f testrun
 
 install:
-	install -Dm755 wyebab     $(DESTDIR)/usr/bin/wyebab
-	install -Dm755 adblock.so $(EXTENSION_DIR)/adblock.so
+	install -Dm755 wyebab     $(DESTDIR)$(PREFIX)/bin/wyebab
+	install -Dm755 adblock.so $(DESTDIR)$(EXTENSION_DIR)/adblock.so
 
 uninstall:
-	rm -f  $(DESTDIR)/usr/bin/wyebab
+	rm -f  $(PREFIX)/bin/wyebab
 	rm -f  $(EXTENSION_DIR)/adblock.so
 	-rmdir $(EXTENSION_DIR)
 
