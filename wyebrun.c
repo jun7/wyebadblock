@@ -116,7 +116,7 @@ static bool ipcsend(char *exe, char *name,
 	return ret;
 }
 
-static gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p);
+static gboolean ipccb(GIOChannel *ch, GIOCondition cnd, gpointer p);
 
 static GSource *ipcwatch(char *exe, char *name, GMainContext *ctx, gpointer p)
 {
@@ -280,55 +280,55 @@ static void __attribute__((destructor)) removepp()
 	for (; rmpath; rmpath = rmpath->next)
 		remove(rmpath->data);
 }
-static Client *makecli()
+static Client *makecl()
 {
-	Client *cli = g_new0(Client, 1);
-	g_mutex_init(&cli->retm);
+	Client *c = g_new0(Client, 1);
+	g_mutex_init(&c->retm);
 	static int tid = 0;
-	cli->pid = g_strdup_printf("%d-%u", tid++, getpid());
+	c->pid = g_strdup_printf("%d-%u", tid++, getpid());
 
-	cli->wctx   = g_main_context_new();
-	cli->loop   = g_main_loop_new(cli->wctx, true);
-	cli->watch  = ipcwatch(CLIDIR, cli->pid, cli->wctx, cli);
-	cli->pppath = ipcpath( CLIDIR, cli->pid);
+	c->wctx   = g_main_context_new();
+	c->loop   = g_main_loop_new(c->wctx, true);
+	c->watch  = ipcwatch(CLIDIR, c->pid, c->wctx, c);
+	c->pppath = ipcpath( CLIDIR, c->pid);
 	g_mutex_lock(&rmm);
-	rmpath = g_slist_prepend(rmpath, cli->pppath);
+	rmpath = g_slist_prepend(rmpath, c->pppath);
 	g_mutex_unlock(&rmm);
 
-	g_thread_unref(g_thread_new("wait", (GThreadFunc)g_main_loop_run, cli->loop));
+	g_thread_unref(g_thread_new("wait", (GThreadFunc)g_main_loop_run, c->loop));
 
-	return cli;
+	return c;
 }
-static void freecli(Client *cli)
+static void freecl(Client *c)
 {
-	g_main_loop_quit(cli->loop);
-	g_source_unref(cli->watch);
-	g_main_loop_unref(cli->loop);
-	g_main_context_unref(cli->wctx);
-	g_mutex_clear(&cli->retm);
-	g_free(cli->pid);
-	g_free(cli->retdata);
-	remove(cli->pppath);
+	g_main_loop_quit(c->loop);
+	g_source_unref(c->watch);
+	g_main_loop_unref(c->loop);
+	g_main_context_unref(c->wctx);
+	g_mutex_clear(&c->retm);
+	g_free(c->pid);
+	g_free(c->retdata);
+	remove(c->pppath);
 	g_mutex_lock(&rmm);
-	rmpath = g_slist_remove(rmpath, cli->pppath);
+	rmpath = g_slist_remove(rmpath, c->pppath);
 	g_mutex_unlock(&rmm);
-	g_free(cli->pppath);
+	g_free(c->pppath);
 }
-static Client *getcli()
+static Client *getcl()
 {
 	static GMutex m;
 	g_mutex_lock(&m);
 
-	static GPrivate pc = G_PRIVATE_INIT((GDestroyNotify)freecli);
-	Client *cli = g_private_get(&pc);
+	static GPrivate pc = G_PRIVATE_INIT((GDestroyNotify)freecl);
+	Client *c = g_private_get(&pc);
 
-	if (!cli)
+	if (!c)
 	{
-		cli = makecli();
-		g_private_set(&pc, cli);
+		c = makecl();
+		g_private_set(&pc, c);
 	}
 	g_mutex_unlock(&m);
-	return cli;
+	return c;
 }
 
 static GHashTable *lastsec = NULL;
@@ -351,32 +351,32 @@ static char *keepstr(char *exe)
 #undef Z
 }
 
-static gboolean pingloop(Client *cli)
+static gboolean pingloop(Client *c)
 {
-	if (!ipcsend(cli->exe, PING, CSping, cli->pid, keepstr(cli->exe)))
-		g_mutex_unlock(&cli->retm);
+	if (!ipcsend(c->exe, PING, CSping, c->pid, keepstr(c->exe)))
+		g_mutex_unlock(&c->retm);
 
 	return true;
 }
-static gboolean timeoutcb(Client *cli)
+static gboolean timeoutcb(Client *c)
 {
-	g_mutex_unlock(&cli->retm);
+	g_mutex_unlock(&c->retm);
 	return false;
 }
 
 //don't free
 static char *request(char *exe, Com type, bool caller, char *data)
 {
-	Client *cli = getcli();
+	Client *c = getcl();
 
 	if (caller)
 	{
-		g_mutex_lock(&cli->retm);
-		g_free(cli->retdata);
-		cli->retdata = NULL;
+		g_mutex_lock(&c->retm);
+		g_free(c->retdata);
+		c->retdata = NULL;
 	}
 
-	if (!ipcsend(exe, INPUT, type, caller ? cli->pid : NULL, data))
+	if (!ipcsend(exe, INPUT, type, caller ? c->pid : NULL, data))
 	{ //svr is not running
 		char *path = ipcpath(exe, "lock");
 		if (!g_file_test(path, G_FILE_TEST_EXISTS))
@@ -387,20 +387,20 @@ static char *request(char *exe, Com type, bool caller, char *data)
 		flock(lock, LOCK_EX);
 
 		//retry in single proc
-		if (!ipcsend(exe, INPUT, type, caller ? cli->pid : NULL, data))
+		if (!ipcsend(exe, INPUT, type, caller ? c->pid : NULL, data))
 		{
 			if (!caller)
-				g_mutex_lock(&cli->retm);
+				g_mutex_lock(&c->retm);
 
 			GSource *tout = g_timeout_source_new(KEEPS * 1000);
-			g_source_set_callback(tout, (GSourceFunc)timeoutcb, cli, NULL);
-			g_source_attach(tout, cli->wctx);
+			g_source_set_callback(tout, (GSourceFunc)timeoutcb, c, NULL);
+			g_source_attach(tout, c->wctx);
 
 
 			char **argv = g_new0(char*, 4);
 			argv[0] = exe;
 			argv[1] = PREFIX;
-			argv[2] = cli->pid;
+			argv[2] = c->pid;
 			GError *err = NULL;
 			if (!g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
 						NULL, NULL, NULL, &err))
@@ -411,8 +411,8 @@ static char *request(char *exe, Com type, bool caller, char *data)
 			g_free(argv);
 
 
-			g_mutex_lock(&cli->retm);
-			g_mutex_unlock(&cli->retm);
+			g_mutex_lock(&c->retm);
+			g_mutex_unlock(&c->retm);
 
 			g_source_destroy(tout);
 			g_source_unref(tout);
@@ -421,8 +421,8 @@ static char *request(char *exe, Com type, bool caller, char *data)
 			wyebkeep(exe, 0);
 
 			if (caller)
-				g_mutex_lock(&cli->retm);
-			if (!ipcsend(exe, INPUT, type, caller ? cli->pid : NULL, data))
+				g_mutex_lock(&c->retm);
+			if (!ipcsend(exe, INPUT, type, caller ? c->pid : NULL, data))
 				P(Spawning %s failed !!, exe)
 		}
 		close(lock);
@@ -431,18 +431,18 @@ static char *request(char *exe, Com type, bool caller, char *data)
 	if (caller)
 	{
 		GSource *ping = g_timeout_source_new(DPINGTIME);
-		cli->exe = exe;
-		g_source_set_callback(ping, (GSourceFunc)pingloop, cli, NULL);
-		g_source_attach(ping, cli->wctx); //attach to ping thread
+		c->exe = exe;
+		g_source_set_callback(ping, (GSourceFunc)pingloop, c, NULL);
+		g_source_attach(ping, c->wctx); //attach to ping thread
 
-		g_mutex_lock(&cli->retm);
-		g_mutex_unlock(&cli->retm);
+		g_mutex_lock(&c->retm);
+		g_mutex_unlock(&c->retm);
 
 		g_source_destroy(ping);
 		g_source_unref(ping);
 	}
 
-	return cli->retdata;
+	return c->retdata;
 }
 
 char *wyebget(char *exe, char *data)
@@ -487,10 +487,10 @@ static void testget(gpointer p, gpointer ap)
 	g_free(p);
 }
 #endif
-static gboolean tcinputcb(GIOChannel *ch, GIOCondition c, char *exe)
+static gboolean tcinputcb(GIOChannel *ch, GIOCondition cnd, char *exe)
 {
 	char *line;
-	if (c == G_IO_HUP || G_IO_STATUS_EOF ==
+	if (cnd == G_IO_HUP || G_IO_STATUS_EOF ==
 			g_io_channel_read_line(ch, &line, NULL, NULL, NULL))
 		exit(0);
 
@@ -566,7 +566,7 @@ void wyebclient(char *exe)
 
 
 //@ipccb
-gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
+gboolean ipccb(GIOChannel *ch, GIOCondition cnd, gpointer p)
 {
 	//D(ipccb %c, svrexe ? 'S':'C')
 	char *line;
@@ -611,13 +611,13 @@ gboolean ipccb(GIOChannel *ch, GIOCondition c, gpointer p)
 	case CClost:
 	case CCwoke:
 	{
-		Client *cli = p;
+		Client *c = p;
 		if (type == CCret)
-			cli->retdata = g_strcompress(data);
+			c->retdata = g_strcompress(data);
 
 		//for the case pinging at same time of ret
-		g_mutex_trylock(&cli->retm);
-		g_mutex_unlock(&cli->retm);
+		g_mutex_trylock(&c->retm);
+		g_mutex_unlock(&c->retm);
 		g_thread_yield();
 		break;
 	}
