@@ -283,7 +283,7 @@ static void __attribute__((destructor)) removepp()
 static Client *makecl()
 {
 	Client *c = g_new0(Client, 1);
-	g_mutex_init(&c->retm);
+//	g_mutex_init(&c->retm);
 	static int tid = 0;
 	c->pid = g_strdup_printf("%d-%u", tid++, getpid());
 
