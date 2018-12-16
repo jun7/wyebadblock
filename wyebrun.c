@@ -313,6 +313,7 @@ static void freecl(Client *c)
 	rmpath = g_slist_remove(rmpath, c->pppath);
 	g_mutex_unlock(&rmm);
 	g_free(c->pppath);
+	g_free(c);
 }
 static Client *getcl()
 {
