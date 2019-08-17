@@ -1,7 +1,7 @@
 # wyebadblock
 An adblock extension using the easylist.txt for [wyeb](https://github.com/jun7/wyeb), also webkit2gtk browsers.
 
-most of code of this are from https://github.com/GNOME/epiphany/tree/master/embed/web-extension
+most of code of this are from https://github.com/GNOME/epiphany/tree/master/embed
 
 wyebab is shared by clients, So even nowadays, browsers spawn procs for each windows,
 wyebab keeps single server proc that makes less RAM and less CPU times.
