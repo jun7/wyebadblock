@@ -140,10 +140,10 @@ static GSource *ipcwatch(char *exe, char *name, GMainContext *ctx, gpointer p)
 
 
 //@server
-static char *svrexe = NULL;
-static GMainLoop *sloop = NULL;
-static wyebdataf dataf = NULL;
-static GHashTable *orders = NULL;
+static char *svrexe;
+static GMainLoop *sloop;
+static wyebdataf dataf;
+static GHashTable *orders;
 static GMutex ordersm;
 
 static gboolean quitif(gpointer p)
@@ -161,7 +161,7 @@ static void until(int sec)
 {
 	if (!sloop) return;
 
-	static guint last = 0;
+	static guint last;
 	static GMutex m;
 	g_mutex_lock(&m);
 	if (last)
@@ -273,7 +273,7 @@ typedef struct {
 	char *exe; //do not free. this is tmp
 } Client;
 
-static GSList *rmpath = NULL;
+static GSList *rmpath;
 static GMutex rmm;
 static void __attribute__((destructor)) removepp()
 {
@@ -284,7 +284,7 @@ static Client *makecl()
 {
 	Client *c = g_new0(Client, 1);
 //	g_mutex_init(&c->retm);
-	static int tid = 0;
+	static int tid;
 	c->pid = g_strdup_printf("%d-%u", tid++, getpid());
 
 	c->wctx   = g_main_context_new();
@@ -332,7 +332,7 @@ static Client *getcl()
 	return c;
 }
 
-static GHashTable *lastsec = NULL;
+static GHashTable *lastsec;
 static GMutex lastm;
 static void setsec(char *exe, int sec)
 {
@@ -581,7 +581,7 @@ gboolean ipccb(GIOChannel *ch, GIOCondition cnd, gpointer p)
 	g_strchomp(data);
 
 #if DEBUG
-	static int i = 0;
+	static int i;
 	D(%c ipccb%d %c/%s/%lu;, svrexe ? 'S':'C', i++, type ,id, strlen(data))
 #endif
 
@@ -593,7 +593,7 @@ gboolean ipccb(GIOChannel *ch, GIOCondition cnd, gpointer p)
 		args->caller = g_strdup(id);
 		args->data = g_strcompress(data);
 
-		static GThreadPool *pool = NULL;
+		static GThreadPool *pool;
 		if (!pool) pool = g_thread_pool_new(getdata, NULL, -1, false, NULL);
 		g_thread_pool_push(pool, args, NULL);
 		break;
@@ -637,7 +637,7 @@ static char *testdata(char *data)
 	//sleep(9);
 	//g_free(data); //makes crash
 
-	static int i = 0;
+	static int i;
 	return g_strdup_printf("%d th test data. req is %s", ++i, data);
 }
 

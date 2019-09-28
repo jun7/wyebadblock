@@ -67,7 +67,7 @@ static gboolean keepcb(WebKitWebPage *kp)
 	return true;
 }
 
-static bool apimode = false;
+static bool apimode;
 static void pageinit(WebKitWebExtension *ex, WebKitWebPage *kp)
 {
 	DD(pageinit)
@@ -118,8 +118,8 @@ G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(
 
 #include "ephy-uri-tester.c"
 
-static EphyUriTester *tester = NULL;
-static GThread *initt = NULL;
+static EphyUriTester *tester;
+static GThread *initt;
 
 static gpointer inittcb(gpointer p)
 {
