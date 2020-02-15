@@ -68,6 +68,10 @@ If the path doesn't work, check https://fanglingsu.github.io/vimb/howto.html#blo
 	mkdir -p ~/.config/lariza/web_extensions
 	ln -s /usr/lib/wyebrowser/adblock.so ~/.config/lariza/web_extensions
 
+### badwolf
+
+	mkdir -p ${XDG_DATA_HOME:-$HOME/.local/share}/badwolf/webkit-web-extensions/
+	ln -s /usr/lib/wyebrowser/adblock.so ${XDG_DATA_HOME:-$HOME/.local/share}/badwolf/webkit-web-extensions/
 
 ### Others
 
