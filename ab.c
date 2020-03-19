@@ -214,6 +214,11 @@ int main(int argc, char **argv)
 	else if (!strcmp(argv[1], "-css") || !strcmp(argv[1], "--css"))
 	{
 		init();
+		if (!initt)
+		{
+			g_print("#There is no "LISTNAME"\n");
+			exit(0);
+		}
 		g_thread_join(initt);
 
 		g_print("%s", tester->blockcss->str);

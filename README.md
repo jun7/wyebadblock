@@ -22,8 +22,7 @@ copy the **easylist.txt** to ~/.config/wyebadblock/
 
 wyebadblock only checks 'easylist.txt'
 
-Testing element hiding is not supported though,
-You can check whether it works on http://simple-adblock.com/faq/testing-your-adblocker/
+You can check whether wyebab has found easylist.txt by `wyebab --css`
 
 
 ## Addition for other webkit2gtk browsers
