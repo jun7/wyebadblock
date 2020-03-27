@@ -7,7 +7,7 @@ wyebab is shared by clients, So even nowadays, browsers spawn procs for each win
 wyebab keeps single server proc that makes less RAM and less CPU times.
 
 For example, while an epiphay's webproc uses 240M RAM for
-[a page](http://simple-adblock.com/faq/testing-your-adblocker/), wyeb uses 160M for the same page.
+a page, wyeb uses 160M for the same page.
 Of course wyebab uses 80M but not gain.
 
 Don't worry, wyebab wills quit automatically when there is no client and 30 secs past.
