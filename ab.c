@@ -60,6 +60,17 @@ static gboolean reqcb(WebKitWebPage *kp, WebKitURIRequest *req,
 	return true;
 }
 
+#if WEBKIT_MAJOR_VERSION > 2 || WEBKIT_MINOR_VERSION > 26
+static gboolean msgcb(WebKitWebPage *kp, WebKitUserMessage *msg, gpointer p)
+{
+	if (strcmp("wyebadblock", webkit_user_message_get_name(msg))) return false;
+	g_object_set_data(G_OBJECT(kp), "adblock",
+		g_variant_get_boolean(webkit_user_message_get_parameters(msg)) ? NULL :
+		GINT_TO_POINTER('n'));
+	return true;
+}
+#endif
+
 static gboolean keepcb(WebKitWebPage *kp)
 {
 	if (g_object_get_data(G_OBJECT(kp), "adblock") != (gpointer)'n')
@@ -74,6 +85,9 @@ static void pageinit(WebKitWebExtension *ex, WebKitWebPage *kp)
 
 	if (!apimode)
 		g_signal_connect(kp, "send-request", G_CALLBACK(reqcb), NULL);
+#if WEBKIT_MAJOR_VERSION > 2 || WEBKIT_MINOR_VERSION > 26
+	g_signal_connect(kp, "user-message-received", G_CALLBACK(msgcb), NULL);
+#endif
 
 	g_object_set_data(G_OBJECT(kp), "wyebcheck", check);
 
@@ -222,10 +236,10 @@ int main(int argc, char **argv)
 		g_thread_join(initt);
 
 		g_print("%s", tester->blockcss->str);
-		g_print("\n\n\n\n{display:none !important}\n"
-				"\n/*\n"
+		g_print("\n\n\n\n"
+				"{display:none !important} /*\n"
 				"{opacity:0 !important; position:absolute !important;}\n"
-				"\n*/\n");
+				);
 		//g_print(tester->blockcssprivate->str);
 	}
 	else
