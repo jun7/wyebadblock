@@ -23,6 +23,8 @@ along with wyebrun.  If not, see <http://www.gnu.org/licenses/>.
 
 //flock
 #include <sys/file.h>
+// for musl-libc havent fcntl in file.h
+#include <fcntl.h>
 
 //monitor
 #include <gio/gio.h>
