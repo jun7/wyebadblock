@@ -14,6 +14,8 @@ Don't worry, wyebab wills quit automatically when there is no client and 30 secs
 
 ## usage:
 
+depends: gtk+-3.0 glib-2.0 webkit2gtk-4.0 gio-2.0
+
 	make
 	sudo make install
 
