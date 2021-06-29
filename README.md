@@ -26,7 +26,6 @@ wyebadblock only checks 'easylist.txt'
 
 You can check whether wyebab has found easylist.txt by `wyebab --css`
 
-
 ## Addition for other webkit2gtk browsers
 webkit2gtk loads extensions in a dir designated by each apps.
 So we have to make a link to wyebab in the dir.
@@ -69,6 +68,8 @@ If the path doesn't work, check https://fanglingsu.github.io/vimb/howto.html#blo
 	mkdir -p ~/.config/lariza/web_extensions
 	ln -s /usr/lib/wyebrowser/adblock.so ~/.config/lariza/web_extensions
 
+Since lariza enables sandbox, wyebadblock does not work without changing 'webkit_web_context_set_sandbox_enabled'.
+
 ### badwolf
 
 	mkdir -p ${XDG_DATA_HOME:-$HOME/.local/share}/badwolf/webkit-web-extensions/
@@ -79,6 +80,7 @@ If the path doesn't work, check https://fanglingsu.github.io/vimb/howto.html#blo
 search 'webkit_web_context_set_web_extensions_directory' in its source code
 and make the link from the dir to the wyebadblock just like above browsers.
 
+Also make sure 'webkit_web_context_set_sandbox_enabled' is not set.
 
 ---
 
