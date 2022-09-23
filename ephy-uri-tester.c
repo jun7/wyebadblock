@@ -304,7 +304,7 @@ ephy_uri_tester_compile_regexp (EphyUriTester *tester,
   len = gpatt->len;
 
   /* TODO: Play with optimization flags */
-  regex = g_regex_new (patt, G_REGEX_OPTIMIZE | G_REGEX_JAVASCRIPT_COMPAT,
+  regex = g_regex_new (patt, G_REGEX_OPTIMIZE,
                        G_REGEX_MATCH_NOTEMPTY, &error);
   if (error) {
     g_warning ("%s: %s", G_STRFUNC, error->message);
