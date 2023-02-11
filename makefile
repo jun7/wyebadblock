@@ -1,8 +1,9 @@
 LISTNAME=easylist.txt
 PREFIX ?= /usr
 WEBKIT ?= webkit2gtk-4.1
-APPDIR ?= wyebrowser/4.1
-EXTENSION_DIR ?= $(PREFIX)/lib/$(APPDIR)
+APPDIR ?= wyebrowser
+APPVER ?= /4.1
+EXTENSION_DIR ?= $(PREFIX)/lib/$(APPDIR)$(APPVER)
 ifeq ($(DEBUG), 1)
 	CFLAGS += -Wall
 else
@@ -46,6 +47,7 @@ install:
 uninstall:
 	rm -f  $(PREFIX)/bin/wyebab
 	rm -f  $(EXTENSION_DIR)/adblock.so
+	-rmdir $(EXTENSION_DIR)$(APPVER)
 	-rmdir $(EXTENSION_DIR)
 
 
