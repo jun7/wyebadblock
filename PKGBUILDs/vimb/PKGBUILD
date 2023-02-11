@@ -4,7 +4,7 @@ pkgver=1
 pkgrel=1
 pkgdesc="adblock link to wyebadblock for vimb."
 arch=('x86_64')
-url="https://github.com/jun7/wyebadblock"
+url="https://github.com/jun7/wyebadblock#4.1"
 license=('GPL3')
 depends=('wyebadblock-git' 'vimb')
 makedepends=()
@@ -13,5 +13,5 @@ source=()
 
 package() {
 	mkdir -p "$pkgdir/usr/lib/vimb"
-	ln -s /usr/lib/wyebrowser/adblock.so "$pkgdir/usr/lib/vimb"
+	ln -s /usr/lib/wyebrowser/4.1/adblock.so "$pkgdir/usr/lib/vimb"
 }
