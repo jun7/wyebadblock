@@ -3,7 +3,7 @@ PREFIX ?= /usr
 WEBKIT ?= webkit2gtk-4.1
 APPDIR ?= wyebrowser
 APPVER ?= /4.1
-EXTENSION_DIR ?= $(PREFIX)/lib/$(APPDIR)$(APPVER)
+EXTENSION_DIR ?= $(PREFIX)/lib/$(APPDIR)
 ifeq ($(DEBUG), 1)
 	CFLAGS += -Wall
 else
@@ -42,11 +42,11 @@ clean:
 
 install:
 	install -Dm755 wyebab     $(DESTDIR)$(PREFIX)/bin/wyebab
-	install -Dm755 adblock.so $(DESTDIR)$(EXTENSION_DIR)/adblock.so
+	install -Dm755 adblock.so $(DESTDIR)$(EXTENSION_DIR)$(APPVER)/adblock.so
 
 uninstall:
 	rm -f  $(PREFIX)/bin/wyebab
-	rm -f  $(EXTENSION_DIR)/adblock.so
+	rm -f  $(EXTENSION_DIR)$(APPVER)/adblock.so
 	-rmdir $(EXTENSION_DIR)$(APPVER)
 	-rmdir $(EXTENSION_DIR)
 
