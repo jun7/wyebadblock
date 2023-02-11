@@ -1,7 +1,7 @@
 LISTNAME=easylist.txt
 PREFIX ?= /usr
 WEBKIT ?= webkit2gtk-4.1
-APPDIR ?= wyebrowser4.1
+APPDIR ?= wyebrowser/4.1
 EXTENSION_DIR ?= $(PREFIX)/lib/$(APPDIR)
 ifeq ($(DEBUG), 1)
 	CFLAGS += -Wall
