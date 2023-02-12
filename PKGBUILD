@@ -7,9 +7,9 @@ arch=('x86_64')
 provides=('wyebab-git')
 url="https://github.com/jun7/wyebadblock"
 license=('GPL3')
-depends=('webkit2gtk')
+depends=('webkit2gtk-4.1')
 makedepends=('git')
-_branch=master
+_branch=4.1
 source=("git+https://github.com/jun7/wyebadblock.git#branch=$_branch")
 md5sums=('SKIP')
 
@@ -33,5 +33,5 @@ build() {
 package() {
 	cd "$srcdir/wyebadblock"
 	install -Dm755 wyebab     "$pkgdir/usr/bin/wyebab"
-	install -Dm755 adblock.so "$pkgdir/usr/lib/wyebrowser/adblock.so"
+	install -Dm755 adblock.so "$pkgdir/usr/lib/wyebrowser/4.1/adblock.so"
 }

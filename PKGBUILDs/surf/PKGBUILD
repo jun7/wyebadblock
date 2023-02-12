@@ -13,5 +13,5 @@ source=()
 
 package() {
 	mkdir -p "$pkgdir/usr/local/lib/surf"
-	ln -s /usr/lib/wyebrowser/adblock.so "$pkgdir/usr/local/lib/surf"
+	ln -s /usr/lib/wyebrowser/4.1/adblock.so "$pkgdir/usr/local/lib/surf"
 }
