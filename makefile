@@ -1,6 +1,6 @@
 LISTNAME=easylist.txt
 PREFIX ?= /usr
-WEBKITVER ?= 4.1
+WEBKITVER ?= 4.0
 WEBKIT ?= webkit2gtk-$(WEBKITVER)
 APPDIR ?= wyebrowser
 EXTENSION_DIR ?= $(PREFIX)/lib/$(APPDIR)
