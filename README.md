@@ -29,7 +29,7 @@ You can check whether wyebab has found easylist.txt by `wyebab --css`
 ## for webkit2gtk-4.1
 	WEBKITVER=4.1 make
 	sudo WEBKITVER=4.1 make install
-Make sure this adds a dir /4.1 before the adblock.so
+Make sure this adds a dir 4.1/ before the adblock.so
 
 ## Addition for other webkit2gtk browsers
 webkit2gtk loads extensions in a dir designated by each apps.
