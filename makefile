@@ -1,6 +1,11 @@
 LISTNAME=easylist.txt
 PREFIX ?= /usr
+WEBKITVER ?= 4.0
 EXTENSION_DIR ?= $(PREFIX)/lib/wyebrowser
+
+ifneq ($(WEBKITVER), 4.0)
+	VERDIR=/$(WEBKITVER)
+endif
 ifeq ($(DEBUG), 1)
 	CFLAGS += -Wall
 else
@@ -13,7 +18,7 @@ all: adblock.so wyebab librun.o testrun
 
 adblock.so: ab.c ephy-uri-tester.c ephy-uri-tester.h librun.o makefile
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< librun.o -shared -fPIC \
-		`pkg-config --cflags --libs gtk+-3.0 glib-2.0 webkit2gtk-4.0` \
+		`pkg-config --cflags --libs gtk+-3.0 glib-2.0 webkit2gtk-$(WEBKITVER)` \
 		$(DDEBUG) -DISEXT -DEXENAME=\"wyebab\"
 
 wyebab: ab.c ephy-uri-tester.c ephy-uri-tester.h librun.o makefile
@@ -39,11 +44,12 @@ clean:
 
 install:
 	install -Dm755 wyebab     $(DESTDIR)$(PREFIX)/bin/wyebab
-	install -Dm755 adblock.so $(DESTDIR)$(EXTENSION_DIR)/adblock.so
+	install -Dm755 adblock.so $(DESTDIR)$(EXTENSION_DIR)$(VERDIR)/adblock.so
 
 uninstall:
 	rm -f  $(PREFIX)/bin/wyebab
-	rm -f  $(EXTENSION_DIR)/adblock.so
+	rm -f  $(EXTENSION_DIR)$(VERDIR)/adblock.so
+	-rmdir $(EXTENSION_DIR)$(VERDIR)
 	-rmdir $(EXTENSION_DIR)
 
 
