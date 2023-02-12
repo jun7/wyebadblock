@@ -2,8 +2,7 @@ LISTNAME=easylist.txt
 PREFIX ?= /usr
 WEBKITVER ?= 4.0
 WEBKIT ?= webkit2gtk-$(WEBKITVER)
-APPDIR ?= wyebrowser
-EXTENSION_DIR ?= $(PREFIX)/lib/$(APPDIR)
+EXTENSION_DIR ?= $(PREFIX)/lib/wyebrowser
 
 ifneq ($(WEBKITVER), 4.0)
 	VERDIR=/$(WEBKITVER)
