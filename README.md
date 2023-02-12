@@ -26,6 +26,11 @@ wyebadblock only checks 'easylist.txt'
 
 You can check whether wyebab has found easylist.txt by `wyebab --css`
 
+## for webkit2gtk-4.1
+	WEBKITVER=4.1 make
+	sudo WEBKITVER=4.1 make install
+Make sure this adds a dir 4.1/ before the adblock.so
+
 ## Addition for other webkit2gtk browsers
 webkit2gtk loads extensions in a dir designated by each apps.
 So we have to make a link to wyebab in the dir.
@@ -53,9 +58,7 @@ There is a PKGBUILD file. see the 'PKGBULDs' dir.
 
 ### vimb
 
-	sudo ln -s /usr/lib/wyebrowser/adblock.so /usr/lib/vimb
-
-There is a PKGBUILD file. see the 'PKGBULDs' dir.
+	sudo ln -s /usr/lib/wyebrowser/4.1/adblock.so /usr/lib/vimb
 
 If the path doesn't work, check https://fanglingsu.github.io/vimb/howto.html#block
 
