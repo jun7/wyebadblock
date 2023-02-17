@@ -26,12 +26,10 @@ prepare() {
 
 build() {
 	cd "$srcdir/wyebadblock"
-	DEBUG=0
-	make
+	DEBUG=0 make
 }
 
 package() {
 	cd "$srcdir/wyebadblock"
-	install -Dm755 wyebab     "$pkgdir/usr/bin/wyebab"
-	install -Dm755 adblock.so "$pkgdir/usr/lib/wyebrowser/4.1/adblock.so"
+	PREFIX="$pkgdir/usr" make install
 }
